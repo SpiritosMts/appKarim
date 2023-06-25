@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "765042782141",
+    "project_id": "gajgaji",
+    "storage_bucket": "gajgaji.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:765042782141:android:968492210989a69a3d6cd4",
+        "android_client_info": {
+          "package_name": "com.example.gajgaji"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "765042782141-kupd43i4rh24l3m0uflf4d820dph18qs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDv908arI5BdN2SzD4MBAWWJaqvmCggy6Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "765042782141-kupd43i4rh24l3m0uflf4d820dph18qs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
