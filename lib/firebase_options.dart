@@ -25,7 +25,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        return macos;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for macos - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.windows:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for windows - '
@@ -45,17 +48,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyAcXhbHjQgI-AtRyfj_NS_Ch3piSGVcZoY',
-    appId: '1:765042782141:web:0f757182049ba0d43d6cd4',
+    appId: '1:765042782141:web:bb665760d49a71183d6cd4',
     messagingSenderId: '765042782141',
     projectId: 'gajgaji',
     authDomain: 'gajgaji.firebaseapp.com',
     storageBucket: 'gajgaji.appspot.com',
-    measurementId: 'G-79MSJ78JC2',
+    measurementId: 'G-4WG6X9NQS8',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDv908arI5BdN2SzD4MBAWWJaqvmCggy6Q',
-    appId: '1:765042782141:android:968492210989a69a3d6cd4',
+    appId: '1:765042782141:android:b746fac080d7a53c3d6cd4',
     messagingSenderId: '765042782141',
     projectId: 'gajgaji',
     storageBucket: 'gajgaji.appspot.com',
@@ -63,17 +66,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAmF2v3L1MRk61PGJfcMruuoxMRvtRs7PY',
-    appId: '1:765042782141:ios:086104ab47ebf71b3d6cd4',
-    messagingSenderId: '765042782141',
-    projectId: 'gajgaji',
-    storageBucket: 'gajgaji.appspot.com',
-    iosClientId: '765042782141-72m7ojtoqt16mu7dpu14r26n74sj5o3o.apps.googleusercontent.com',
-    iosBundleId: 'com.example.gajgaji',
-  );
-
-  static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyAmF2v3L1MRk61PGJfcMruuoxMRvtRs7PY',
-    appId: '1:765042782141:ios:086104ab47ebf71b3d6cd4',
+    appId: '1:765042782141:ios:4c2f08f8cacbbbfd3d6cd4',
     messagingSenderId: '765042782141',
     projectId: 'gajgaji',
     storageBucket: 'gajgaji.appspot.com',

@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:765042782141:android:968492210989a69a3d6cd4",
+        "mobilesdk_app_id": "1:765042782141:android:b746fac080d7a53c3d6cd4",
         "android_client_info": {
-          "package_name": "com.example.gajgaji"
+          "package_name": "com.debou.gajgaji"
         }
       },
       "oauth_client": [
@@ -29,6 +29,13 @@
             {
               "client_id": "765042782141-kupd43i4rh24l3m0uflf4d820dph18qs.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "765042782141-72m7ojtoqt16mu7dpu14r26n74sj5o3o.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.gajgaji"
+              }
             }
           ]
         }

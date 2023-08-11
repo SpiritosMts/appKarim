@@ -15,15 +15,16 @@ import 'package:firebase_core/firebase_core.dart';
 
 import 'package:responsive_sizer/responsive_sizer.dart';
 
+import '_manager/myTheme/myThemeCtr.dart';
+import '_manager/styles.dart';
 import 'firebase_options.dart';
-import 'manager/bindings.dart';
-import 'manager/firebaseControl.dart';
-import 'manager/intro.dart';
-import 'manager/loadingScreen.dart';
-import 'manager/myLocale/myLocale.dart';
-import 'manager/myLocale/myLocaleCtr.dart';
-import 'manager/myTheme/myTheme.dart';
-import 'manager/myVoids.dart';
+import '_manager/bindings.dart';
+import '_manager/firebaseControl.dart';
+import '_manager/intro.dart';
+import '_manager/loadingScreen.dart';
+import '_manager/myLocale/myLocale.dart';
+import '_manager/myLocale/myLocaleCtr.dart';
+import '_manager/myVoids.dart';
 
 
 SharedPreferences? sharedPrefs;
@@ -35,7 +36,8 @@ StreamSubscription? userStream;
 //FirebaseAnalyticsObserver get observer => FirebaseAnalyticsObserver(analytics: analytics);
 /// INTRO /////////
 int introTimes = 0;
-bool showIntro = true;
+bool showIntro = false  ;
+
 introTimesGet()async{
   introTimes = sharedPrefs!.getInt('intro')??0 ;
   print('## introTimes_get_<$introTimes>');
@@ -54,41 +56,16 @@ Future<void> initFirebase() async {  /// FIREBASE_INIT
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  ///Crashlytics
-  // FlutterError.onError = FirebaseCrashlytics.instance.recordFlutterFatalError;
-  // PlatformDispatcher.instance.onError = (error, stack) {
-  //   FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-  //   return true;
-  // };
-  ///ANLYTICS
 
 
 }
-Future<void> main() async { // if app not launched yet backgroundService void starts before
+Future<void> main() async {
   print('##run_main');
   await WidgetsFlutterBinding.ensureInitialized();//don't touch
+  await initFirebase();
 
-  await checkFirebase();
-  ///alarm
-  //await Alarm.init(showDebugLogs: true);
   ///PREFS
   sharedPrefs = await SharedPreferences.getInstance();
-
-
-
-  /// NOTIFICATIONS
-
-  //await NotificationController.initializeLocalNotifications(debug: true);///awesome notif
-
-  ///BACKGROUND
-  // BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
-  // await initBackgroundState();
-  ///BG_SERVICE
-  // if(!await FlutterBackgroundService().isRunning()){
-  //   await initializeBGService();
-  // }
-  //await initializeBGService();
-
 
 
   /// RUN_APP
@@ -106,51 +83,16 @@ class MyApp extends StatefulWidget {
 }
 class _MyAppState extends State<MyApp> {
   MyLocaleCtr langCtr =   Get.put(MyLocaleCtr());  //lang
-  //MyThemeCtr themeCtr =   Get.put(MyThemeCtr());  //theme
+  MyThemeCtr themeCtr =   Get.put(MyThemeCtr());  //theme
   bool introShown = false;
 
 
 
   @override
   void initState() {
-    ///NotificationController.startListeningNotificationEvents();
-
-    // analytics = FirebaseAnalytics.instance;
-    // observer = FirebaseAnalyticsObserver(analytics: analytics!);
-    //introShown = sharedPrefs!.getBool('introShown') ?? false;
-
     super.initState();
   }
 
-  ///  notif route  /////////////////////
-  // List<Route<dynamic>> onGenerateInitialRoutes(String initialRouteName) {
-  //   List<Route<dynamic>> pageStack = [];
-  //
-  //   pageStack.add(
-  //       MaterialPageRoute(builder: (_) =>  MyHomeNotifPage())
-  //   );
-  //
-  //   if (initialRouteName == '/notification-page' && NotificationController.initialAction != null) {
-  //     pageStack.add(
-  //         MaterialPageRoute(builder: (_) => NotificationPage(
-  //             receivedAction: NotificationController.initialAction!))
-  //     );
-  //   }
-  //   return pageStack;
-  // }
-  // Route<dynamic>? onGenerateRoute(RouteSettings settings) {
-  //   switch (settings.name) {
-  //     case '/':
-  //       return MaterialPageRoute(builder: (_) => const MyHomeNotifPage());
-  //
-  //
-  //     case '/notification-page':
-  //       ReceivedAction receivedAction = settings.arguments as ReceivedAction;
-  //       return MaterialPageRoute(builder: (_) => NotificationPage(receivedAction: receivedAction)
-  //       );
-  //   }
-  //   return null;
-  // }
 
   /// ///////////////////
   @override
@@ -160,27 +102,19 @@ class _MyAppState extends State<MyApp> {
           return GetMaterialApp(
             navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
-            title: 'app-name',
+            title: 'Gajgaji',
 
+            //theme: waterAndSodaTheme,
             theme: customLightTheme,
             darkTheme: customDarkTheme,
-            themeMode: ThemeMode.system,
+            themeMode: ThemeMode.light,
 
             locale: langCtr.initlang,
             translations: MyLocale(),
 
-            ///notif route
-            // onGenerateInitialRoutes: onGenerateInitialRoutes,
-            // onGenerateRoute: onGenerateRoute,
-
-            // navigatorObservers:  [
-            //   FirebaseAnalyticsObserver(analytics: analytics!),
-            // ],
-
             initialBinding: GetxBinding(),
-            //initialRoute: '/',
             getPages: [
-              GetPage(name: '/', page: () => ((introTimes < introShowTimes)|| showIntro) ? IntroScreen():LoadingScreen()),
+              GetPage(name: '/', page: () => ((introTimes < introShowTimes) && showIntro) ? IntroScreen():LoadingScreen()),
               //GetPage(name: '/', page: () => ScreenManager()),//in test mode
 
             ],
