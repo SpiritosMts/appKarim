@@ -26,8 +26,8 @@ class ProductsCtr extends GetxController {
 
   //add new product
   GlobalKey<FormState> addProductKey = GlobalKey<FormState>();
-  final priceTec = TextEditingController();
-  final buyPpriceTec = TextEditingController();
+  final sellPriceTec = TextEditingController();
+  final buyPriceTec = TextEditingController();
   final nameTec = TextEditingController();
   final qtyTec = TextEditingController();
   final qtyPerUnitTec = TextEditingController();
@@ -52,7 +52,7 @@ class ProductsCtr extends GetxController {
   void onInit() {
     super.onInit();
     Future.delayed(const Duration(seconds: 0), () {
-      refreshProducts();//when app starts + when invoice checked
+      //refreshProducts();//when app starts + when invoice checked
     });
   }
 
@@ -87,19 +87,20 @@ class ProductsCtr extends GetxController {
           qtyPerUnit: qtyPerUnitTec.text,
           imageUrl: '',
           addedTime: todayToString(),
-        currPrice: double.parse(priceTec.text),
-          currBuyPrice: double.parse(buyPpriceTec.text),
+          currPrice: double.parse(sellPriceTec.text),
+          currBuyPrice: double.parse(buyPriceTec.text),
         currQty: int.parse(qtyTec.text),
         prodChanges: {
           '0': ProdChange(
             time: todayToString(),
-            price: double.parse(priceTec.text),
+            sellPrice: double.parse(sellPriceTec.text),
+            buyPrice: double.parse(buyPriceTec.text),
             qty: int.parse(qtyTec.text),
-          ).toJson()
+          ).toJson()//first when add new product
         }
 
       ).toJson();
-      /// add worker to cloud
+      /// add prod to cloud
       addDocument(
         fieldsMap: modelToAdd,
         collName: productsCollName,
@@ -151,7 +152,7 @@ class ProductsCtr extends GetxController {
         //showSnack('curr price & qty updated',color:Colors.black54);
         //print('## <$productID> new curr qty is < $currQty >');
 
-        priceTec.clear();
+        sellPriceTec.clear();
         qtyTec.clear();
         update();
       }).catchError((error) async {
@@ -166,61 +167,64 @@ class ProductsCtr extends GetxController {
 
 
   /// this is added manuallu in (+) btn of each product card
-  addBuyProc() async {
-    if (addBSProductKey.currentState!.validate()) {
-      showLoading(text: 'Loading...'.tr);
+  addBuyProc({required Product prod,required int chosenQty,required String invID,required String deliveryName,required double inputPrice}) async {
 
-       addToMap(
-          coll: productsColl,
-          //withBackDialog: true,
-          docID: selectedProd.id,
-          fieldMapName: 'buyHis',
-          mapToAdd: BuySellProd(
-              price: double.parse(bsPriceTec.text),/// this is the buy price that will be in currBuyPrice
-              qty: int.parse(bsQtyTec.text),
-              restQty: selectedProd.currQty! + int.parse(bsQtyTec.text),
-              total:  double.parse(bsPriceTec.text)* int.parse(bsQtyTec.text),
+    addToMap(
+        coll: productsColl,
+        //withBackDialog: true,
+        docID: prod.id,
+        fieldMapName: 'buyHis',
+        mapToAdd: BuySellProd(
 
-              time: todayToString(),
-              society: societyTec.text,
-              driver: driverTec.text,
-              mf:mfTec.text,
-              to: societyName,
-              invID:'',// in sell auto
 
-          ).toJson(),
-          addSuccess: () {
-            updateProduct(selectedProd.id!,currQty: selectedProd.currQty! + int.parse(bsQtyTec.text),currBuyPrice: double.parse(bsPriceTec.text));///manual buy of invoice
-            print('## <${selectedProd.name}> made < BUY > process (increase qty) "${selectedProd.currQty!} + <${bsQtyTec.text}> = ${selectedProd.currQty! + int.parse(bsQtyTec.text)} "');
 
-            Get.back();
+          price: inputPrice,
+          qty: chosenQty,
+          restQty: prod.currQty! + chosenQty ,/// restQty
+          total:  inputPrice * chosenQty,
 
-            bsPriceTec.clear();
-            bsQtyTec.clear();
-            driverTec.clear();
-            societyTec.clear();
-            mfTec.clear();
-          }
-      );
-      //Get.back();
-      Get.back();//hide loading
+          time: todayToString(),
+          society: societyTec.text,//user enter this
+          driver: driverTec.text,//user enter this
+          mf:mfTec.text,//user enter this
+          to: societyName,
+          invID:invID,//
 
-    }
+        ).toJson(),
+        addSuccess: () {
+          updateProduct(prod.id!,currQty: prod.currQty! + chosenQty,currBuyPrice: inputPrice);///auto buy of invoice
+          print('## <${prod.name}> made < BUY > process (increase qty) "${prod.currQty!} + <${chosenQty}> = ${prod.currQty! + chosenQty} " + Change currBuyPrice [${prod.currBuyPrice}]=>[${inputPrice}]');
 
+
+          ///if activate add each one alone uncomment this and the getBack below
+          // Get.back();
+          // bsPriceTec.clear();
+          // bsQtyTec.clear();
+          // driverTec.clear();
+          // societyTec.clear();
+          // mfTec.clear();
+
+          // if (addBSProductKey.currentState!.validate()) {
+          //   showLoading(text: 'Loading...'.tr);
+          //   //Get.back();//hide loading
+          // }
+        }
+    );
   }
   /// these are added automatically in the invoice in for loop one call for each product
-  addSellProc({required Product prod,required int chosenQty,required String invID,required String deliveryName,required double income}){//merge with kridi
+  addSellProc({required Product prod,required int chosenQty,required String invID,required String deliveryName,required double income,required double inputPrice}){//merge with kridi
       addToMap(
           coll: productsColl,
           docID: prod.id,
           //withBackDialog: true,
           fieldMapName: 'sellHis',
           mapToAdd: BuySellProd(
-              price: prod.currPrice,
+              price: inputPrice,
               qty: chosenQty,
-              restQty: prod.currQty! - chosenQty,/// restQty
+              restQty: prod.currQty! - chosenQty < 0?0:prod.currQty! - chosenQty,/// restQty
+            total:  inputPrice * chosenQty,
+
               income: income,// income of single sell
-              total:  prod.currPrice! * chosenQty,
 
               time: todayToString(),
               society: societyName, // our society name
@@ -232,8 +236,34 @@ class ProductsCtr extends GetxController {
 
           ).toJson(),
           addSuccess: () {
-            updateProduct(prod.id!,currQty: prod.currQty! - chosenQty);///auto sell of invoice
+            updateProduct(prod.id!,currQty: prod.currQty! - chosenQty < 0 ?0:prod.currQty! - chosenQty  );///auto sell of invoice
             print('## <${prod.name}> made < SELL > process (decrease qty) "${prod.currQty!} - <${chosenQty}> = ${prod.currQty! - chosenQty} "');
+
+
+          }
+      );
+
+  }
+  /// these are added automatically in the invoice in for loop one call for each product
+  addReturnProc({required Product prod,required int chosenQty,required String invID,required bool isBuyInv}){//merge with kridi
+    deleteFromMap(
+          coll: productsColl,
+          docID: prod.id,//to add the quantity
+          //withBackDialog: true,
+          fieldMapName: isBuyInv ? 'buyHis':'sellHis',//delete  from sellHis
+          targetInvID: invID,// choose one of these
+          //mapKeyToDelete: '',// choose one of these
+          addSuccess: () {
+            if(isBuyInv){
+              updateProduct(prod.id!,currQty: prod.currQty! - chosenQty  );///auto return of buy invoice
+              print('## <${prod.name}> made < RETURN > process (decrease qty) "${prod.currQty!} - <${chosenQty}> = ${prod.currQty! - chosenQty} "');
+
+            }else{
+              updateProduct(prod.id!,currQty: prod.currQty! + chosenQty  );///auto return of sell invoice
+              print('## <${prod.name}> made < RETURN > process (increase qty) "${prod.currQty!} + <${chosenQty}> = ${prod.currQty! + chosenQty} "');
+
+
+            }
 
 
           }
@@ -242,45 +272,56 @@ class ProductsCtr extends GetxController {
   }
   /// this process made at first time adding the product & when you edit prd with pencil btn
   updateProductWithManualChange() async {//MAnual Changes
-    if (addProductKey.currentState!.validate()) {
-      showLoading(text: 'Loading'.tr);
-      productsColl.doc(selectedProd.id).get().then((DocumentSnapshot documentSnapshot) async {
-        if (documentSnapshot.exists) {
-          Map<String, dynamic> fieldMap = documentSnapshot.get('prodChanges');
+    print('## price: ${selectedProd.currPrice} / qty: ${selectedProd.currQty}');
+    if (addProductKey.currentState!.validate() ) {
 
-          //int newItemIndex = fieldMap.length ;
+      bool sellPriceChanged =  double.parse(sellPriceTec.text) != selectedProd.currPrice;
+      bool buyPriceChanged =  double.parse(buyPriceTec.text) != selectedProd.currBuyPrice;
+      bool qtyChanged =  double.parse(qtyTec.text) != selectedProd.currQty;
 
-          //New item to ADD
-          fieldMap[getLastIndex(fieldMap,afterLast: true)] = ProdChange(
-            time: todayToString(),
-            price: double.parse(priceTec.text),
-            qty: int.parse(qtyTec.text),
-          ).toJson();
+      if( sellPriceChanged || buyPriceChanged || qtyChanged ){
+        showLoading(text: 'Loading'.tr);
+        productsColl.doc(selectedProd.id).get().then((DocumentSnapshot documentSnapshot) async {
+          if (documentSnapshot.exists) {
+            Map<String, dynamic> fieldMap = documentSnapshot.get('prodChanges');
 
+            //int newItemIndex = fieldMap.length ;
 
-          await productsColl.doc(selectedProd.id).update({
-            'prodChanges': fieldMap,
-            'currPrice': double.parse(priceTec.text),
-            'currQty': int.parse(qtyTec.text),
-            //'name': nameTec.text,
-          }).then((value) async {
-            Get.back();//back loading
-            Get.back();//back dialog
-            print('## product updated');
-            showSnack('product updated',color:Colors.black54);
-            priceTec.clear();
-            qtyTec.clear();
-            //nameTec.clear();
-            Future.delayed(const Duration(milliseconds: 500), () {
-              update();
+            //New item to ADD
+            fieldMap[getLastIndex(fieldMap, afterLast: true)] = ProdChange(
+              time: todayToString(),
+              sellPrice: sellPriceChanged? double.parse(sellPriceTec.text):88888,
+              buyPrice: buyPriceChanged? double.parse(buyPriceTec.text):88888,
+              qty: sellPriceChanged? int.parse(qtyTec.text):88888,
+            ).toJson();// make manual change with btn
 
+            await productsColl.doc(selectedProd.id).update({
+              'prodChanges': fieldMap,
+              'currBuyPrice': double.parse(buyPriceTec.text),
+              'currPrice': double.parse(sellPriceTec.text),
+              'currQty': int.parse(qtyTec.text),
+              //'name': nameTec.text,
+            }).then((value) async {
+              Get.back(); //back loading
+              Get.back(); //back dialog
+              print('## product updated');
+              showSnack('product updated'.tr, color: Colors.black54);
+              buyPriceTec.clear();
+              sellPriceTec.clear();
+              qtyTec.clear();
+              //nameTec.clear();
+              Future.delayed(const Duration(milliseconds: 500), () {
+                update();
+              });
+            }).catchError((error) async {
+              print('## item to fieldMap FAILED to updated');
+              showSnack('product failed to be updated'.tr, color: Colors.redAccent.withOpacity(0.8));
             });
-          }).catchError((error) async {
-            print('## item to fieldMap FAILED to updated');
-            showSnack('product failed to be updated',color: Colors.redAccent.withOpacity(0.8));
-          });
-        }
-      });
+          }
+        });
+      }else{
+        showSnack('you need to make changes'.tr,color:Colors.black54);
+      }
     }
   }
 
@@ -308,7 +349,7 @@ class ProductsCtr extends GetxController {
 
     return AlertDialog(
       backgroundColor: dialogsCol,
-      title:isAdd? Text('Add New Product'.tr):Text('Update "${selectedProd.name}"'.tr,
+      title:isAdd? Text('Add New Product'.tr):Text('${'Update'.tr} "${selectedProd.name}"'.tr,
         style: TextStyle(
           color: dialogTitleCol,
         ),),
@@ -338,36 +379,38 @@ class ProductsCtr extends GetxController {
 
   }
 
-  //depricated
-  addprodChangeProc({required Product product,bool manual = false ,double newPrice = 0.0,bool isSell = false ,int bsQty = 0,int manualQty = 0,bool withBackDialog = false}){
-
-    int quantity = 0;
-    if(manual){
-      quantity = manualQty;
-    }else{
-      if(isSell) {quantity = product.currQty! - bsQty;}
-      else { quantity = product.currQty! + bsQty;}
-
-    }
-
-    addToMap(
-        coll: productsColl,
-        docID: '${product.id}',
-        fieldMapName: 'prodChanges',
-        withBackDialog: withBackDialog,
-        mapToAdd: ProdChange(
-          time: todayToString(),
-          price: newPrice!= 0.0 ? newPrice: product.currPrice,
-          qty: quantity,
-
-        ).toJson(),
-        addSuccess: () {
-          Get.back();
-          priceTec.clear();
-          qtyTec.clear();
-
-        }
-    );
-  }
+  /// depricated ***********
+  // addprodChangeProc({required Product product,bool manual = false ,double newPrice = 0.0,bool isSell = false ,int bsQty = 0,int manualQty = 0,bool withBackDialog = false}){
+  //
+  //   int quantity = 0;
+  //   if(manual){
+  //     quantity = manualQty;
+  //   }else{
+  //     if(isSell) {quantity = product.currQty! - bsQty;}
+  //     else { quantity = product.currQty! + bsQty;}
+  //
+  //   }
+  //
+  //   addToMap(
+  //       coll: productsColl,
+  //       docID: '${product.id}',
+  //       fieldMapName: 'prodChanges',
+  //       withBackDialog: withBackDialog,
+  //       mapToAdd: ProdChange(
+  //         time: todayToString(),
+  //         price: newPrice!= 0.0 ? newPrice: product.currPrice,
+  //         //buyPrice: double.parse(buyPriceTec.text),
+  //
+  //         qty: quantity,
+  //
+  //       ).toJson(),
+  //       addSuccess: () {
+  //         Get.back();
+  //         priceTec.clear();
+  //         qtyTec.clear();
+  //
+  //       }
+  //   );
+  // }
 
 }

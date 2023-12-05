@@ -2,19 +2,22 @@ import 'buySellProd.dart';
 
 class ProdChange {
   String? time;
-  double? price;
+  double? sellPrice;
+  double? buyPrice;
   int? qty;
 
   ProdChange({
     this.time='',
-    this.price=0.0,
+    this.sellPrice=0.0,
+    this.buyPrice=0.0,
     this.qty=0,
   });
 
   factory ProdChange.fromJson(Map<String, dynamic> json) {
     return ProdChange(
       time: json['time'],
-      price: json['price'].toDouble(),
+      sellPrice: json['price'].toDouble(),
+      buyPrice: (json['buyPrice']??88888.0).toDouble(),//if this field doesnt exist in db make it zero
       qty: json['qty'].toInt(),
     );
   }
@@ -23,7 +26,8 @@ class ProdChange {
   Map<String, dynamic> toJson() {
     return {
       'time': time,
-      'price': price,
+      'price': sellPrice,
+      'buyPrice': buyPrice,
       'qty': qty,
     };
   }

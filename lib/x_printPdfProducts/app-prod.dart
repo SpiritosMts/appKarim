@@ -1,18 +1,4 @@
-/*
- * Copyright (C) 2017, David PHAM-VAN <dev.nfet.net@gmail.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+
 
 import 'dart:async';
 import 'dart:io';
@@ -29,17 +15,17 @@ import 'package:url_launcher/url_launcher.dart' as ul;
 
 import '../_manager/bindings.dart';
 import '../_manager/styles.dart';
-import 'examples.dart';
-import 'invoicePdf.dart';
+import '../x_printPdf/examples.dart';
+import 'invoicePdf-prod.dart';
 
-class PrintScreen extends StatefulWidget {
-  const PrintScreen({Key? key}) : super(key: key);
+class PrintScreenProds extends StatefulWidget {
+  const PrintScreenProds({Key? key}) : super(key: key);
 
   @override
-  PrintScreenState createState() => PrintScreenState();
+  PrintScreenProdsState createState() => PrintScreenProdsState();
 }
 
-class PrintScreenState extends State<PrintScreen> with SingleTickerProviderStateMixin {
+class PrintScreenProdsState extends State<PrintScreenProds> with SingleTickerProviderStateMixin {
   int _tab = 0;
   TabController? _tabController;
 
@@ -52,7 +38,7 @@ class PrintScreenState extends State<PrintScreen> with SingleTickerProviderState
   @override
   void initState() {
     super.initState();
-    //_init();
+    _init();
   }
 
   @override
@@ -112,8 +98,7 @@ class PrintScreenState extends State<PrintScreen> with SingleTickerProviderState
 
   void _showSources() {
     ul.launchUrl(
-      Uri.parse(
-        'https://github.com/DavBfr/dart_pdf/blob/master/demo/lib/examples/${examples[_tab].file}',
+      Uri.parse('https://github.com/DavBfr/dart_pdf/blob/master/demo/lib/examples/${examples[_tab].file}',
       ),
     );
   }
@@ -161,10 +146,10 @@ class PrintScreenState extends State<PrintScreen> with SingleTickerProviderState
 
   @override
   Widget build(BuildContext context) {
-    // pw.RichText.debug = true;
-    // if (_tabController == null) {
-    //   return const Center(child: CircularProgressIndicator());
-    // }
+    pw.RichText.debug = true;
+    if (_tabController == null) {
+      return const Center(child: CircularProgressIndicator());
+    }
     final actions = <PdfPreviewAction>[
       if (!kIsWeb)
         PdfPreviewAction(
@@ -196,7 +181,7 @@ class PrintScreenState extends State<PrintScreen> with SingleTickerProviderState
           //maxPageWidth: 700,
           actions: actions,
           onPrinted: _showPrintedToast,
-          build: (format) => Example('INVOICE', 'invoicePdf.dart', generateInvoice).builder(format, _data),
+          build: (format) => Example('INVOICE', 'invoicePdf-prod.dart', generateProds).builder(format, _data),
           //onShared: _showSharedToast,
         ),
       ),

@@ -7,12 +7,11 @@ import '../clients/clientsCtr.dart';
 import '../invoices/invoiceCtr.dart';
 import '../products/productsCtr.dart';
 import '../workers/workersCtr.dart';
-import 'auth/authCtr.dart';
 import 'myLocale/myLocaleCtr.dart';
 import 'myTheme/myThemeCtr.dart';
 
 
-AuthController authCtr = AuthController.instance;
+//AuthController authCtr = AuthController.instance;
 
 WorkersCtr get wrkCtr => Get.find<WorkersCtr>();
 ClientsCtr get cltCtr => Get.find<ClientsCtr>();
@@ -31,7 +30,7 @@ class GetxBinding implements Bindings {
   void dependencies() {
     //TODO
 
-    Get.put<AuthController>(AuthController());
+    //Get.put<AuthController>(AuthController());
 
 
     Get.put<ProductsCtr>(ProductsCtr());

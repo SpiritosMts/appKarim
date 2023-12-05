@@ -50,10 +50,13 @@ class ChangeTotal extends StatelessWidget {
                   validator: (value) {
                     final numberRegExp = RegExp(r'^\d*\.?\d+$');
 
+                    // if (invCtr.selectedInvoice.isBuy! && double.parse(value!) > 0) {
+                    //   return "buy price must be negative".tr;
+                    // }
                     if (value!.isEmpty) {
                       return "price can't be empty".tr;
                     }
-                    if (!numberRegExp.hasMatch(value!)) {
+                    if (!numberRegExp.hasMatch(value)) {
                       return 'Please enter a valid price'.tr;
                     }
 
@@ -91,7 +94,7 @@ class ChangeTotal extends StatelessWidget {
                       TextButton(
                         style: filledStyle(),
                         onPressed: ()  {
-                          invCtr.changetotalPrice();
+                          invCtr.changeTotalInvPrice();
                         },
                         child: Text(
                           "Update".tr,

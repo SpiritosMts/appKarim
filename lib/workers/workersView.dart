@@ -55,7 +55,7 @@ class _WorkersViewState extends State<WorkersView> {
 
                     //itemExtent: 180,
 
-                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                    padding: const EdgeInsets.only(top: 5,bottom:60, right: 15, left: 15,),
                     shrinkWrap: true,
                     itemCount: workers.length,
                     itemBuilder: (BuildContext context, int index) {
@@ -101,7 +101,7 @@ class _WorkersViewState extends State<WorkersView> {
 
                 return Center(
                   child: Text(
-                    "no data".tr,
+                    "Liste est vide".tr,
                     style: const TextStyle(
                         fontSize: 24,
                         color: Colors.white70

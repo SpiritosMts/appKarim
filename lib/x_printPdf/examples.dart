@@ -5,10 +5,11 @@ import 'package:pdf/pdf.dart';
 
 import 'invoicePdf.dart';
 
+// DEPRICATED ******
 
 const examples = <Example>[
 
-  Example('INVOICE', 'invoicePdf.dart', generateInvoice),
+  //Example('INVOICE', 'invoicePdf-prod.dart', generateInvoice),
   // Example('RÉSUMÉ', 'resume.dart', generateResume),
   // Example('DOCUMENT', 'document.dart', generateDocument),
   // Example('REPORT', 'report.dart', generateReport),
@@ -22,9 +23,9 @@ typedef LayoutCallbackWithData = Future<Uint8List> Function(
 class Example {
   const Example(this.name, this.file, this.builder, [this.needsData = false]);
 
-  final String name;
+  final String name;//dep
 
-  final String file;
+  final String file;//dep
 
   final LayoutCallbackWithData builder;
 

@@ -11,6 +11,7 @@ import '../_manager/firebaseVoids.dart';
 import '../_manager/myLocale/myLocaleCtr.dart';
 import '../_manager/myUi.dart';
 import '../_manager/styles.dart';
+import '../x_printPdfProducts/app-prod.dart';
 
 //########################################################################
 //########################################################################
@@ -29,6 +30,14 @@ class _ProductsViewState extends State<ProductsView> {
       appBar: AppBar(
         title: Text('Products'.tr),
         bottom: appBarUnderline(),
+        actions: <Widget>[
+          IconButton(
+            icon: Icon(Icons.print),
+            onPressed: () {
+              Get.to(()=>PrintScreenProds());
+            },
+          ),
+        ],
       ),
 
       body: GetBuilder<ProductsCtr>(
@@ -47,7 +56,7 @@ class _ProductsViewState extends State<ProductsView> {
                       ?  ListView.builder(
                     //physics: const NeverScrollableScrollPhysics(),
                     //itemExtent: 180,
-                      padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                      padding: const EdgeInsets.only(top: 5,bottom:60, right: 15, left: 15,),
                       shrinkWrap: true,
                       itemCount: products.length,
                       itemBuilder: (BuildContext context, int index) {
@@ -72,7 +81,11 @@ class _ProductsViewState extends State<ProductsView> {
                     child: CircularProgressIndicator(color: Colors.white70),
                   );
                 } else if (snapshot.hasError) {
-                  print('## error(futureBuider): ${snapshot.error}');
+                  print('## error(futureBuilder): ${snapshot.error}');
+                  //String errorLocation = StackTrace.current.toString(); // Get the current stack trace
+                  //print('## error location: $errorLocation'); // Log the error location
+                  throw snapshot.error!; // Throw the error
+
                   return Center(
                     child: Text(
                       snapshotErrorMsg,

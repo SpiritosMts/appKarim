@@ -14,6 +14,7 @@ import 'addClientDialog.dart';
 
 class ClientsCtr extends GetxController {
   List<Clienth> clientsList = [];
+  List<String> clientsNamesList = [];
   Clienth selectedClient = Clienth();
 
   selectClient(Clienth clt) {
@@ -43,6 +44,14 @@ class ClientsCtr extends GetxController {
   @override
   void onClose() {
     super.onClose();
+  }
+
+  refreshClients() async {
+    clientsList = await getAlldocsModelsFromFb<Clienth>(clientsColl, (json) => Clienth.fromJson(json));
+    clientsNamesList = clientsList.where((model) => model.name != null) // Filter out models without a name
+        .map((model) => model.name!) // Extract the name
+        .toList();
+    print('## GET Clients <${clientsList.length}>');
   }
 
   addClient() async {

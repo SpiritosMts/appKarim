@@ -718,10 +718,9 @@ richTextWidget() {
 //   );
 // }
 
-
-Widget customFAB({String? text ,IconData? icon ,VoidCallback? onPressed }){
- return Padding(
-    padding:  EdgeInsets.symmetric(horizontal: 00.0, vertical: 20),
+Widget customFAB({String? text, IconData? icon, VoidCallback? onPressed,String? heroTag}) {
+  return Padding(
+    padding: EdgeInsets.symmetric(horizontal: 00.0, vertical: 00),
     child: Container(
       // height: 40.0,
       // width: 130.0,
@@ -731,16 +730,15 @@ Widget customFAB({String? text ,IconData? icon ,VoidCallback? onPressed }){
         child: FloatingActionButton.extended(
           onPressed: onPressed,
 
-
+          heroTag: heroTag,
           //backgroundColor: yellowColHex,
           label: Row(
             mainAxisSize: MainAxisSize.min,
-
             children: [
-              Icon(icon??Icons.add),
+              Icon(icon ?? Icons.add),
               SizedBox(width: 8),
               Text(
-                text??'',
+                text ?? '',
                 overflow: TextOverflow.ellipsis,
               ),
             ],
@@ -751,12 +749,15 @@ Widget customFAB({String? text ,IconData? icon ,VoidCallback? onPressed }){
   );
 }
 
-
 /// workers
 
 Widget expKridiCard(key, ExpKridi expKridi, {bool isExp = true}) {
   double cardHei = 130;
-
+  String type = isExp
+      ? 'expense'.tr
+      : expKridi.paid!
+          ? 'paid kridi'.tr
+          : 'kridi'.tr;
   return Padding(
     padding: const EdgeInsets.all(5.0),
     child: Container(
@@ -812,6 +813,8 @@ Widget expKridiCard(key, ExpKridi expKridi, {bool isExp = true}) {
               ),
             ),
           ),
+
+          ///remove
           Positioned(
             top: 13,
             right: (currLang == 'ar') ? null : 13, //english
@@ -821,7 +824,7 @@ Widget expKridiCard(key, ExpKridi expKridi, {bool isExp = true}) {
                 size: 20,
                 Icons.close,
                 //weight: 50,
-                color: Colors.red.withOpacity(0.65),
+                color: Colors.white.withOpacity(0.35),
               ),
               onTap: () {
                 ///deleteExpKridi(ind);
@@ -833,6 +836,24 @@ Widget expKridiCard(key, ExpKridi expKridi, {bool isExp = true}) {
                       coll: workersColl, docID: wrkCtr.selectedWorker.id, fieldMapName: 'kridiHis', mapKeyToDelete: key);
                 }
               },
+            ),
+          ),
+
+          ///Type
+          Positioned(
+            bottom: 13,
+            right: (currLang == 'ar') ? null : 13, //english
+            left: (currLang == 'ar') ? 13 : null, //arabic
+            child: Text(
+              type.toUpperCase(),
+              style: TextStyle(
+                  color: !isExp
+                      ? expKridi.paid!
+                          ? Colors.white54
+                          : Colors.greenAccent
+                      : Colors.redAccent,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500),
             ),
           ),
         ],
@@ -862,9 +883,7 @@ Widget workerCard(Workerh worker) {
               color: cardColor,
               elevation: 50,
               shape: RoundedRectangleBorder(
-                  side: BorderSide(color:  Colors.white38, width: 2),
-                  borderRadius: BorderRadius.circular(20)
-              ),
+                  side: BorderSide(color: Colors.white38, width: 2), borderRadius: BorderRadius.circular(20)),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 5, 15, 10),
                 child: Column(
@@ -894,13 +913,15 @@ Widget workerCard(Workerh worker) {
                               '${'Tel:'.tr} ${worker.phone}',
                               style: TextStyle(color: Colors.white, fontSize: 13),
                             ),
+
                             ///email
                             // Text(
                             //   'Email: ${worker.email}',
                             //   style: TextStyle(color: Colors.white, fontSize: 11),
                             // ),
                             //SizedBox(height: 5),
-                            SizedBox(height: 5),
+                            SizedBox(height: 10),
+
                             ///krdi
                             Padding(
                               padding: const EdgeInsets.only(bottom: 0.0),
@@ -913,23 +934,26 @@ Widget workerCard(Workerh worker) {
                                       text: 'kridi:'.tr,
                                       style: GoogleFonts.almarai(
                                         height: 1,
-                                        textStyle: TextStyle(color: Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.w500),
+                                        textStyle:
+                                            TextStyle(color: Colors.greenAccent, fontSize: 13, fontWeight: FontWeight.w500),
                                       )),
                                   TextSpan(
                                       text: '  ${formatNumberAfterComma2(worker.totalKridi!)}',
                                       style: GoogleFonts.almarai(
                                         height: 1,
-                                        textStyle: TextStyle(color:  Colors.white , fontSize: 15, fontWeight: FontWeight.w500),
+                                        textStyle: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
                                       )),
                                   TextSpan(
                                       text: '  $currency',
                                       style: GoogleFonts.almarai(
                                         height: 1,
-                                        textStyle: const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
+                                        textStyle:
+                                            const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
                                       )),
                                 ]),
                               ),
                             ),
+
                             ///expenses
                             Padding(
                               padding: const EdgeInsets.only(bottom: 0.0),
@@ -945,24 +969,21 @@ Widget workerCard(Workerh worker) {
                                         textStyle: TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w500),
                                       )),
                                   TextSpan(
-                                      text: '  ${formatNumberAfterComma2(worker.totalKridi!)}',
+                                      text: '  ${formatNumberAfterComma2(worker.totalExpenses!)}',
                                       style: GoogleFonts.almarai(
                                         height: 1,
-                                        textStyle: TextStyle(color:  Colors.white , fontSize: 15, fontWeight: FontWeight.w500),
+                                        textStyle: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500),
                                       )),
                                   TextSpan(
                                       text: '  $currency',
                                       style: GoogleFonts.almarai(
                                         height: 1,
-                                        textStyle: const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
+                                        textStyle:
+                                            const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
                                       )),
                                 ]),
                               ),
                             ),
-
-
-
-
                           ],
                         ),
                       ],
@@ -971,6 +992,8 @@ Widget workerCard(Workerh worker) {
                 ),
               ),
             ),
+
+            ///remove
             Positioned(
               top: 13,
               right: (currLang == 'ar') ? null : 13, //english
@@ -1000,13 +1023,13 @@ Widget workerCard(Workerh worker) {
                               wrkCtr.update();
                             });
                           });
-
-                      /// remove product from coll
                     }
                   });
                 },
               ),
             ),
+
+            ///edit
             Positioned(
               bottom: 13,
               right: (currLang == 'ar') ? null : 13, //english
@@ -1024,12 +1047,15 @@ Widget workerCard(Workerh worker) {
                 },
               ),
             ),
+
+            ///expense & kridi
             Positioned(
               bottom: cardHei / 3,
               right: (currLang == 'ar') ? null : 25, //english
               left: (currLang == 'ar') ? 25 : null, //arabic
               child: Row(
                 children: [
+                  ///expense
                   CircleAvatar(
                     backgroundColor: Colors.redAccent.withOpacity(0.6),
                     radius: 18,
@@ -1046,6 +1072,8 @@ Widget workerCard(Workerh worker) {
                   SizedBox(
                     width: 10,
                   ),
+
+                  ///kridi
                   CircleAvatar(
                     backgroundColor: Colors.greenAccent.withOpacity(0.6),
                     radius: 18,
@@ -1091,9 +1119,7 @@ Widget clientCard(Clienth client) {
               color: cardColor,
               elevation: 50,
               shape: RoundedRectangleBorder(
-                  side: BorderSide(color:  Colors.white38, width: 2),
-                  borderRadius: BorderRadius.circular(20)
-              ),
+                  side: BorderSide(color: Colors.white38, width: 2), borderRadius: BorderRadius.circular(20)),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(10, 5, 15, 10),
                 child: Column(
@@ -1131,6 +1157,7 @@ Widget clientCard(Clienth client) {
                               style: TextStyle(color: Colors.white, fontSize: 11),
                             ),
                             SizedBox(height: 5),
+
                             ///email
 
                             Text(
@@ -1138,10 +1165,6 @@ Widget clientCard(Clienth client) {
                               style: TextStyle(color: Colors.white, fontSize: 11),
                             ),
                             SizedBox(height: 5),
-
-
-
-
                           ],
                         ),
                       ],
@@ -1186,7 +1209,6 @@ Widget clientCard(Clienth client) {
                 },
               ),
             ),
-
           ],
         ),
       ),
@@ -1242,15 +1264,17 @@ Widget productCard(Product product) {
                             Text(
                               '${product.name}',
                               style: TextStyle(
-                                  color: (product.currPrice! < product.currBuyPrice! || product.currQty! <= 0 ) ?  Colors.redAccent.withOpacity(0.7): Colors.white,
+                                  color: (product.currPrice! < product.currBuyPrice! || product.currQty! <= 0)
+                                      ? Colors.redAccent.withOpacity(0.7)
+                                      : Colors.white,
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold),
                             ),
                             SizedBox(height: 5),
 
                             Text(
-                              '${'qty:'.tr} ${product.currQty}',
-                              style: TextStyle(color:product.currQty! > 0 ? Colors.white:Colors.redAccent, fontSize: 13),
+                              '${'qty:'.tr} ${product.currQtyReduced != product.currQty ? '${product.currQtyReduced} /' : ''} ${product.currQty} ',
+                              style: TextStyle(color: product.currQty! > 0 ? Colors.white : Colors.redAccent, fontSize: 13),
                             ),
                             SizedBox(height: 5),
 
@@ -1272,13 +1296,17 @@ Widget productCard(Product product) {
                                       text: '  ${formatNumberAfterComma2(product.currPrice!)}',
                                       style: GoogleFonts.almarai(
                                         height: 1,
-                                        textStyle: TextStyle(color: product.currPrice! <= product.currBuyPrice! ? Colors.redAccent : Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+                                        textStyle: TextStyle(
+                                            color: product.currPrice! <= product.currBuyPrice! ? Colors.redAccent : Colors.white,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500),
                                       )),
                                   TextSpan(
                                       text: '  $currency',
                                       style: GoogleFonts.almarai(
                                         height: 1,
-                                        textStyle: const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
+                                        textStyle:
+                                            const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
                                       )),
                                 ]),
                               ),
@@ -1303,14 +1331,17 @@ Widget productCard(Product product) {
                                       text: '  ${formatNumberAfterComma2(product.currBuyPrice!)}',
                                       style: GoogleFonts.almarai(
                                         height: 1,
-                                        textStyle: TextStyle(color: product.currBuyPrice! <= 0.0 ? Colors.redAccent : Colors.white, fontSize: 15, fontWeight: FontWeight.w500),
+                                        textStyle: TextStyle(
+                                            color: product.currBuyPrice! <= 0.0 ? Colors.redAccent : Colors.white,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.w500),
                                       )),
                                   TextSpan(
                                       text: '  $currency',
                                       style: GoogleFonts.almarai(
                                         height: 1,
                                         textStyle:
-                                        const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
+                                            const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
                                       )),
                                 ]),
                               ),
@@ -1323,6 +1354,7 @@ Widget productCard(Product product) {
                 ),
               ),
             ),
+            /// REMOVE
             Positioned(
               top: 13,
               right: (currLang == 'ar') ? null : 13, //english
@@ -1357,6 +1389,7 @@ Widget productCard(Product product) {
                 },
               ),
             ),
+            /// EDIT
             Positioned(
               bottom: 13,
               right: (currLang == 'ar') ? null : 13, //english
@@ -1374,49 +1407,47 @@ Widget productCard(Product product) {
                 },
               ),
             ),
-            Positioned(
-              bottom: cardHei / 3,
-              right: (currLang == 'ar') ? null : 25, //english
-              left: (currLang == 'ar') ? 25 : null, //arabic
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.greenAccent.withOpacity(0.35),
-                    radius: 18,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      icon: Icon(Icons.add, size: 19),
-                      color: Colors.white,
-                      onPressed: () {
-                        prdCtr.selectProduct(product);
-                        showAnimDialog(prdCtr.addBSProductDialog(isSell: false));
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            /// ADD BUY QTY BUTTON
+            // Positioned(
+            //   bottom: cardHei / 3,
+            //   right: (currLang == 'ar') ? null : 25, //english
+            //   left: (currLang == 'ar') ? 25 : null, //arabic
+            //   child: Row(
+            //     children: [
+            //       CircleAvatar(
+            //         backgroundColor: Colors.greenAccent.withOpacity(0.35),
+            //         radius: 18,
+            //         child: IconButton(
+            //           padding: EdgeInsets.zero,
+            //           icon: Icon(Icons.add, size: 19),
+            //           color: Colors.white,
+            //           onPressed: () {
+            //             prdCtr.selectProduct(product);
+            //             showAnimDialog(prdCtr.addBSProductDialog(isSell: false));
+            //           },
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
           ],
         ),
       ),
     ),
   );
 }
-Widget bsProdCard(key, BuySellProd bsProd) {
+
+Widget bsProdCard(key, BuySellProd bsProd, {Function()? whenRemove}) {
   double cardHei = 130;
   Color incomeCol = bsProd.income! > 0 ? winIncomeCol : looseIncomeCol;
   String type = '';
-  if(key.startsWith("0s")){
-    type = 'sell';
-
-  }else  if(key.startsWith("0b")){
-    type = 'buy';
-
+  if (key.startsWith("0s")) {
+    type = 'Sell';
+  } else if (key.startsWith("0b")) {
+    type = 'Buy';
+  } else {
+    type = 'Manual';
   }
-  else {
-    type = 'manual';
-  }
-
 
   return Padding(
     padding: const EdgeInsets.all(5.0),
@@ -1445,7 +1476,7 @@ Widget bsProdCard(key, BuySellProd bsProd) {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ///price
+                          /// sell price & selled qty
                           Padding(
                             padding: const EdgeInsets.only(bottom: 0.0),
                             child: RichText(
@@ -1471,7 +1502,7 @@ Widget bsProdCard(key, BuySellProd bsProd) {
                                           const TextStyle(color: Colors.white54, fontSize: 13, fontWeight: FontWeight.w500),
                                     )),
                                 TextSpan(
-                                    text: '  (${bsProd.qty}) $key',
+                                    text: '  (${bsProd.qty})',
                                     style: GoogleFonts.almarai(
                                       height: 1,
                                       textStyle: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500),
@@ -1488,6 +1519,7 @@ Widget bsProdCard(key, BuySellProd bsProd) {
                           ),
                           SizedBox(height: 5),
 
+                          ///total
                           Padding(
                             padding: const EdgeInsets.only(bottom: 0.0),
                             child: RichText(
@@ -1522,13 +1554,8 @@ Widget bsProdCard(key, BuySellProd bsProd) {
                             ),
                           ),
                           SizedBox(height: 5),
-
-                          if(type == 'buy') Text(
-                            //'society: ${bsProd.society} (${bsProd.mf})',
-                            '${'society:'.tr} ${bsProd.society}',
-                            style: TextStyle(color: Colors.white, fontSize: 13),
-                          ),
-                          if(type == 'sell') Padding(
+                          ///invoice name
+                          Padding(
                             padding: const EdgeInsets.only(bottom: 0.0),
                             child: RichText(
                               locale: Locale(currLang!),
@@ -1540,28 +1567,68 @@ Widget bsProdCard(key, BuySellProd bsProd) {
                                       width: 0,
                                     )),
                                 TextSpan(
-                                    text: 'income:'.tr,
+                                    text: 'Info:'.tr,
                                     style: GoogleFonts.almarai(
                                       height: 1,
-                                      textStyle: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                                      textStyle: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w500),
                                     )),
                                 TextSpan(
-                                    text: '  ${formatNumberAfterComma2(bsProd.income!)}',
+                                    text: '  ${(bsProd.to!)}',
                                     style: GoogleFonts.almarai(
                                       height: 1,
-                                      textStyle: TextStyle(color: incomeCol, fontSize: 13, fontWeight: FontWeight.w500),
+                                      textStyle: TextStyle(color: Colors.yellow, fontSize: 13, fontWeight: FontWeight.w500),
                                     )),
                                 TextSpan(
-                                    text: '  $currency',
+                                    text: '  ${bsProd.invID}',
                                     style: GoogleFonts.almarai(
                                       height: 1,
                                       textStyle:
-                                      const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
+                                      const TextStyle(color: Colors.white54, fontSize: 9, fontWeight: FontWeight.w500),
                                     )),
                               ]),
                             ),
                           ),
-
+                          /// if "sell" show income if "buy" show society
+                          // if (type == 'buy')
+                          //   Text(
+                          //     //'society: ${bsProd.society} (${bsProd.mf})',
+                          //     '${'society:'.tr} ${bsProd.society}',
+                          //     style: TextStyle(color: Colors.white, fontSize: 13),
+                          //   ),
+                          // if (type == 'sell')
+                          //   Padding(
+                          //     padding: const EdgeInsets.only(bottom: 0.0),
+                          //     child: RichText(
+                          //       locale: Locale(currLang!),
+                          //       textAlign: TextAlign.start,
+                          //       //softWrap: true,
+                          //       text: TextSpan(children: [
+                          //         WidgetSpan(
+                          //             child: SizedBox(
+                          //           width: 0,
+                          //         )),
+                          //         TextSpan(
+                          //             text: 'income:'.tr,
+                          //             style: GoogleFonts.almarai(
+                          //               height: 1,
+                          //               textStyle: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                          //             )),
+                          //         TextSpan(
+                          //             text: '  ${formatNumberAfterComma2(bsProd.income!)}',
+                          //             style: GoogleFonts.almarai(
+                          //               height: 1,
+                          //               textStyle: TextStyle(color: incomeCol, fontSize: 13, fontWeight: FontWeight.w500),
+                          //             )),
+                          //         TextSpan(
+                          //             text: '  $currency',
+                          //             style: GoogleFonts.almarai(
+                          //               height: 1,
+                          //               textStyle:
+                          //                   const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
+                          //             )),
+                          //       ]),
+                          //     ),
+                          //   ),
                         ],
                       ),
                     ],
@@ -1585,33 +1652,51 @@ Widget bsProdCard(key, BuySellProd bsProd) {
               ),
               onTap: () {
                 ///deleteExpKridi(ind);
-                if (type=='sell') {
-                  deleteFromMap(coll: productsColl, docID: prdCtr.selectedProd.id, fieldMapName: 'sellHis', mapKeyToDelete: key.substring(2));
-                } else if(type=='buy'){
-                  deleteFromMap(coll: productsColl, docID: prdCtr.selectedProd.id, fieldMapName: 'buyHis', mapKeyToDelete: key.substring(2));
-                }else{//manual
-
+                if (type == 'Sell') {
+                  deleteFromMap(
+                      coll: productsColl,
+                      docID: prdCtr.selectedProd.id,
+                      fieldMapName: 'sellHis',
+                      mapKeyToDelete: key.substring(2));
+                } else if (type == 'Buy') {
+                  deleteFromMap(
+                      coll: productsColl,
+                      docID: prdCtr.selectedProd.id,
+                      fieldMapName: 'buyHis',
+                      mapKeyToDelete: key.substring(2));
+                } else {
+                  print('## trying delete failed not "sell" nor "buy"');
+                  //manual
                 }
+                whenRemove!();
               },
             ),
           ),
+
           ///Type
           Positioned(
             bottom: 13,
             right: (currLang == 'ar') ? null : 13, //english
             left: (currLang == 'ar') ? 13 : null, //arabic
             child: Text(
-              type.toUpperCase(),
-              style: TextStyle(color: type=='sell'? Colors.greenAccent:type=='buy'? Colors.redAccent: Colors.white54, fontSize: 13, fontWeight: FontWeight.w500),
+              type.tr.toUpperCase(),
+              style: TextStyle(
+                  color: type == 'Sell'
+                      ? Colors.greenAccent
+                      : type == 'Buy'
+                          ? Colors.redAccent
+                          : Colors.white54,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500),
             ),
           ),
-
         ],
       ),
     ),
   );
 }
-Widget manualProdChangeCard(String key, ProdChange prodChange) {
+
+Widget manualProdChangeCard(String key, ProdChange prodChange, {Function()? whenRemove}) {
   double cardHei = 100;
 
   return Padding(
@@ -1641,9 +1726,9 @@ Widget manualProdChangeCard(String key, ProdChange prodChange) {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          ///price
+                          /// sell price
 
-                          Padding(
+                          if(prodChange.sellPrice ! !=88888) Padding(
                             padding: const EdgeInsets.only(bottom: 0.0),
                             child: RichText(
                               locale: Locale(currLang!),
@@ -1661,7 +1746,45 @@ Widget manualProdChangeCard(String key, ProdChange prodChange) {
                                       textStyle: TextStyle(color: Colors.white54, fontSize: 15, fontWeight: FontWeight.w500),
                                     )),
                                 TextSpan(
-                                    text: '  ${formatNumberAfterComma2(prodChange.price!)}',
+                                    text: '  ${formatNumberAfterComma2(prodChange.sellPrice!)}',
+                                    style: GoogleFonts.almarai(
+                                      height: 1,
+                                      textStyle: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500),
+                                    )),
+                                TextSpan(
+                                    text: '  $currency',
+                                    style: GoogleFonts.almarai(
+                                      height: 1,
+                                      textStyle:
+                                          const TextStyle(color: Colors.white54, fontSize: 14, fontWeight: FontWeight.w500),
+                                    )),
+                              ]),
+                            ),
+                          ),
+                          SizedBox(
+                            height: 11,
+                          ),
+                          /// buy price
+
+                         if(prodChange.buyPrice! !=88888) Padding(
+                            padding: const EdgeInsets.only(bottom: 0.0),
+                            child: RichText(
+                              locale: Locale(currLang!),
+                              textAlign: TextAlign.start,
+                              //softWrap: true,
+                              text: TextSpan(children: [
+                                WidgetSpan(
+                                    child: SizedBox(
+                                  width: 0,
+                                )),
+                                TextSpan(
+                                    text: 'buy price:'.tr,
+                                    style: GoogleFonts.almarai(
+                                      height: 1,
+                                      textStyle: TextStyle(color: Colors.white54, fontSize: 15, fontWeight: FontWeight.w500),
+                                    )),
+                                TextSpan(
+                                    text: '  ${formatNumberAfterComma2(prodChange.buyPrice!)}',
                                     style: GoogleFonts.almarai(
                                       height: 1,
                                       textStyle: TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w500),
@@ -1681,7 +1804,7 @@ Widget manualProdChangeCard(String key, ProdChange prodChange) {
                           ),
 
                           ///qty
-                          Padding(
+                          if(prodChange.qty! !=88888) Padding(
                             padding: const EdgeInsets.only(bottom: 0.0),
                             child: RichText(
                               locale: Locale(currLang!),
@@ -1721,9 +1844,10 @@ Widget manualProdChangeCard(String key, ProdChange prodChange) {
             left: (currLang == 'ar') ? 13 : null, //arabic
             child: Text(
               'MANUAL',
-              style: TextStyle(color:Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
+              style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w500),
             ),
           ),
+
           ///remove
           Positioned(
             top: 13,
@@ -1737,8 +1861,13 @@ Widget manualProdChangeCard(String key, ProdChange prodChange) {
                 color: Colors.white.withOpacity(0.35),
               ),
               onTap: () {
-               deleteFromMap(
-                    coll: productsColl, docID: prdCtr.selectedProd.id, fieldMapName: 'prodChanges', mapKeyToDelete: key.substring(2));
+                deleteFromMap(
+                    coll: productsColl,
+                    docID: prdCtr.selectedProd.id,
+                    fieldMapName: 'prodChanges',
+                    mapKeyToDelete: key.substring(2));
+                //delete from "selectedMonthMap" to refresh screen after delete
+                whenRemove!();
               },
             ),
           ),
@@ -1749,7 +1878,7 @@ Widget manualProdChangeCard(String key, ProdChange prodChange) {
 }
 
 ///Invoice
-Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
+Widget invoiceCard(Invoice inv, int index, {bool ofToday = false}) {
   double cardHei = 130;
   Color incomeCol = inv.income! > 0 ? winIncomeCol : looseIncomeCol;
 
@@ -1759,113 +1888,112 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
   bool newDay = true;
 
   /// check if its new
-  if(index !=0){
-    if(getDayString(allInvs[index].timeReturn!) != getDayString(allInvs[index-1].timeReturn!)){
+  if (index != 0) {
+    if (getDayString(allInvs[index].timeReturn!) != getDayString(allInvs[index - 1].timeReturn!) ||
+        getMonthString(allInvs[index].timeReturn!) != getMonthString(allInvs[index - 1].timeReturn!)) {
       newDay = true; // day != day-bf
-    }else{
+    } else {
       newDay = false;
-
     }
   }
-  /// if new calculate total
-  if(newDay && index < allInvs.length-1){
-    for (int i = index+1; i < allInvs.length; i++) {
 
-      if(getDayString(allInvs[index].timeReturn!) == getDayString(allInvs[i].timeReturn!)){
+  /// if new calculate total
+  if (newDay && index < allInvs.length) {
+    for (int i = index + 1; i < allInvs.length; i++) {
+      if (getDayString(allInvs[index].timeReturn!) == getDayString(allInvs[i].timeReturn!) &&
+          getMonthString(allInvs[index].timeReturn!) == getMonthString(allInvs[i].timeReturn!)) {
         dayTotalSell += allInvs[i].returnTotal!;
         dayTotalIncome += allInvs[i].income!;
-      }else{
+      } else {
         // get out from for loop
         break;
       }
-
     }
-
   }
 
-    return GestureDetector(
+  return GestureDetector(
     onTap: () {
       // open expenses and his tabs
       invCtr.selectInvoice(inv);
-      Get.to(() => AddEditInvoice(), arguments: {'isAdd': false, 'isVerified': inv.verified,});
+      Get.to(() => AddEditInvoice(), arguments: {'isAdd': false, 'isVerified': inv.verified,'isBuy': false,});
     },
     child: Padding(
       padding: const EdgeInsets.all(5.0),
       child: Column(
         children: [
-         if(newDay) Padding(
-            padding: const EdgeInsets.only(bottom:5.0),
-            child: Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10.0,vertical: 15.0),
-                    child: Text(
-                      '${getDayString(inv.timeReturn!)}  ${getMonthString(inv.timeReturn!)}',
-                      style: TextStyle(color: Colors.white, fontSize: 17),
+          /// total date
+          if (newDay)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 5.0),
+              child: Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 15.0),
+                      child: Text(
+                        '${getDayString(inv.timeReturn!)}  ${getMonthString(inv.timeReturn!)}',
+                        style: TextStyle(color: Colors.white, fontSize: 17),
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Divider(
-                      thickness: 1,
-                      color: dividerColor,
+                    Expanded(
+                      child: Divider(
+                        thickness: 1,
+                        color: dividerColor,
+                      ),
                     ),
-                  ),
 
-                  ///day total
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: RichText(
-                      locale: Locale(currLang!),
-                      textAlign: TextAlign.start,
-                      //softWrap: true,
+                    ///day total
+                    Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: RichText(
+                        locale: Locale(currLang!),
+                        textAlign: TextAlign.start,
+                        //softWrap: true,
 
-                      text: TextSpan(
-
-                          children: [
-                        // TextSpan(
-                        //     text: 'Total:',
-                        //     style: GoogleFonts.almarai(
-                        //       height: 1,
-                        //       textStyle: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
-                        //     )),
-                        TextSpan(
-                            text: '${formatNumberAfterComma2(dayTotalIncome)}',
-
-                            style: GoogleFonts.almarai(
-
-                              height: 1,
-                              textStyle: TextStyle(color: dayTotalIncome > 0 ? winIncomeCol : looseIncomeCol, fontSize: 15, fontWeight: FontWeight.w500),
-                            )),
-                        TextSpan(
-                            text: ' / ',
-                            style: GoogleFonts.almarai(
-                              height: 1,
-                              textStyle: TextStyle(color: Colors.white54, fontSize: 15, fontWeight: FontWeight.w500),
-                            )),
-                        TextSpan(
-                            text: '${formatNumberAfterComma2(dayTotalSell)}',
-                            style: GoogleFonts.almarai(
-                              height: 1,
-                              textStyle: TextStyle(color: totalCol, fontSize: 15, fontWeight: FontWeight.w500),
-                            )),
-                        TextSpan(
-                            text: '  $currency',
-                            style: GoogleFonts.almarai(
-                              height: 1,
-                              textStyle:
-                              const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
-                            )),
-                      ]),
+                        text: TextSpan(children: [
+                          // TextSpan(
+                          //     text: 'Total:',
+                          //     style: GoogleFonts.almarai(
+                          //       height: 1,
+                          //       textStyle: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                          //     )),
+                          TextSpan(
+                              text: '${formatNumberAfterComma2(dayTotalIncome)}',
+                              style: GoogleFonts.almarai(
+                                height: 1,
+                                textStyle: TextStyle(
+                                    color: dayTotalIncome > 0 ? winIncomeCol : looseIncomeCol,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w500),
+                              )),
+                          TextSpan(
+                              text: ' / ',
+                              style: GoogleFonts.almarai(
+                                height: 1,
+                                textStyle: TextStyle(color: Colors.white54, fontSize: 15, fontWeight: FontWeight.w500),
+                              )),
+                          TextSpan(
+                              text: '${formatNumberAfterComma2(dayTotalSell)}',
+                              style: GoogleFonts.almarai(
+                                height: 1,
+                                textStyle: TextStyle(color: totalCol, fontSize: 15, fontWeight: FontWeight.w500),
+                              )),
+                          TextSpan(
+                              text: '  $currency',
+                              style: GoogleFonts.almarai(
+                                height: 1,
+                                textStyle: const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
+                              )),
+                        ]),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-
             ),
-          ),
+
+          ///card
           Container(
             width: 100.w,
             height: cardHei,
@@ -1875,11 +2003,10 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
                   color: cardColor,
                   elevation: 50,
                   shape: RoundedRectangleBorder(
-                      side: BorderSide(color: isDateToday(inv.timeReturn!) ?  activeCardBorder:normalCardBorder, width: 2),
-                      borderRadius: BorderRadius.circular(20)
-                  ),
+                      side: BorderSide(color: isDateToday(inv.timeReturn!) ? activeCardBorder : normalCardBorder, width: 2),
+                      borderRadius: BorderRadius.circular(20)),
                   child: Padding(
-                    padding: const EdgeInsets.fromLTRB(10, 5, 15, 10),
+                    padding: const EdgeInsets.fromLTRB(10, 0, 15, 10),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -1887,14 +2014,14 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            monthSquare(inv.timeReturn!),
+                            /// inv index & add time
+                            indexSquare(inv.timeReturn!, inv.index!, inv.verified),
                             SizedBox(width: 10),
                             Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-
-                                ///type
+                                /// name + type
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 0.0),
                                   child: RichText(
@@ -1905,26 +2032,25 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
                                     //softWrap: true,
                                     text: TextSpan(children: [
                                       TextSpan(
-                                          text: '${(!kIsWeb && inv.deliveryName!.length>20) ? '${inv.deliveryName!.substring(0, 19)}...' : inv.deliveryName}',
-
+                                          text:
+                                              '${(!kIsWeb && inv.deliveryName!.length > 20) ? '${inv.deliveryName!.substring(0, 19)}...' : inv.deliveryName}',
                                           style: GoogleFonts.almarai(
                                             height: 1,
                                             textStyle: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500),
                                           )),
-
                                       TextSpan(
-                                          text: '  ${inv.type}',
+                                          text: '  ${inv.type!.tr}',
                                           style: GoogleFonts.almarai(
                                             height: 1,
                                             textStyle:
-                                            const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
+                                                const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
                                           )),
                                     ]),
                                   ),
                                 ),
                                 SizedBox(height: 8),
 
-                                ///return
+                                /// sell return
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 0.0),
                                   child: RichText(
@@ -1939,13 +2065,14 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
                                             textStyle: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
                                           )),
                                       TextSpan(
-                                          text: '  ${ inv.verified! ? formatNumberAfterComma2(inv.returnTotal!):formatNumberAfterComma2(inv.outTotal!)}',
+                                          text:
+                                              '  ${inv.verified! ? formatNumberAfterComma2(inv.returnTotal!) : formatNumberAfterComma2(inv.outTotal!)}',
                                           style: GoogleFonts.almarai(
                                             height: 1,
-                                            textStyle: TextStyle(color: totalCol, fontSize: 16, fontWeight: FontWeight.w500),
+                                            textStyle: TextStyle(color: !inv.isBuy! ? totalCol:looseIncomeCol, fontSize: 16, fontWeight: FontWeight.w500),
                                           )),
                                       TextSpan(
-                                          text: '  $currency${inv.totalChanged! ? ', changed':''}',
+                                          text: '  $currency${inv.totalChanged! ? ', changed' : ''}',
                                           style: GoogleFonts.almarai(
                                             height: 1,
                                             textStyle:
@@ -1956,8 +2083,8 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
                                 ),
                                 SizedBox(height: 8),
 
-                                ///income
-                                Padding(
+                                /// income
+                               if(!inv.isBuy!) Padding(
                                   padding: const EdgeInsets.only(bottom: 0.0),
                                   child: RichText(
                                     locale: Locale(currLang!),
@@ -1990,6 +2117,35 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
                                     ]),
                                   ),
                                 ),
+
+                                if(inv.isBuy!) Padding(
+                                  padding: const EdgeInsets.only(bottom: 0.0),
+                                  child: RichText(
+                                    locale: Locale(currLang!),
+                                    textAlign: TextAlign.start,
+                                    //softWrap: true,
+                                    text: TextSpan(children: [
+                                      WidgetSpan(
+                                          child: SizedBox(
+                                            width: 0,
+                                          )),
+                                      TextSpan(
+                                          text:  'Purchases invoice'.tr,
+                                          style: GoogleFonts.almarai(
+                                            height: 1,
+                                            textStyle: TextStyle(color: buyCol.withOpacity(0.8), fontSize: 13, fontWeight: FontWeight.w500),
+                                          )),
+
+                                      TextSpan(
+                                          text: '  ${inv.productsOut!.length} ${'products'.tr}',
+                                          style: GoogleFonts.almarai(
+                                            height: 1,
+                                            textStyle:
+                                            const TextStyle(color: Colors.white54, fontSize: 10, fontWeight: FontWeight.w500),
+                                          )),
+                                    ]),
+                                  ),
+                                ),
                                 SizedBox(height: 0),
                               ],
                             ),
@@ -2012,46 +2168,29 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
                       //weight: 50,
                       color: Colors.white.withOpacity(0.3),
                     ),
-                    onTap: () {
-                      showNoHeader(
-                        txt: 'Are you sure you want to remove this invoice ?'.tr,
-                        icon: Icons.close,
-                        btnOkColor: Colors.red,
-                        btnOkText: 'Remove'.tr,
-                      ).then((toAllow) {
-                        // if admin accept
-                        if (toAllow) {
-                          deleteDoc(
-                              docID: inv.id!,
-                              coll: invoicesColl,
-                              btnOnPress: () {
-                                showSnack('${'invoice'.tr} "${inv.id}" ${'removed'.tr}', color: Colors.redAccent.withOpacity(0.8));
-                                invCtr.update();
-                              });
-
-                          /// remove product from coll
-                        }
-                      });
+                    onTap: () async {
+                      invCtr.removeInvoice(inv);
                     },
                   ),
                 ),
-               // if(inv.verified!) Positioned(
-               //    bottom: 13,
-               //    right: (currLang == 'ar') ? null : 13, //english
-               //    left: (currLang == 'ar') ? 13 : null, //arabic
-               //    child: GestureDetector(
-               //      child: Icon(
-               //        size: 20,
-               //        Icons.print,
-               //        //weight: 50,
-               //        color: Colors.yellowAccent.withOpacity(0.3),
-               //      ),
-               //      onTap: () {
-               //        invCtr.selectInvoice(inv);
-               //        Get.to(()=>PrintScreen());
-               //      },
-               //    ),
-               //  ),
+                // if(inv.verified!) Positioned(
+                //    bottom: 13,
+                //    right: (currLang == 'ar') ? null : 13, //english
+                //    left: (currLang == 'ar') ? 13 : null, //arabic
+                //    child: GestureDetector(
+                //      child: Icon(
+                //        size: 20,
+                //        Icons.print,
+                //        //weight: 50,
+                //        color: Colors.yellowAccent.withOpacity(0.3),
+                //      ),
+                //      onTap: () {
+                //        invCtr.selectInvoice(inv);
+                //        Get.to(()=>PrintScreen());
+                //      },
+                //    ),
+                //  ),
+                ///icon indicate invoice state (checked or waiting)
                 Positioned(
                   bottom: cardHei / 3,
                   right: (currLang == 'ar') ? null : 25, //english
@@ -2059,10 +2198,10 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        backgroundColor: inv.verified! ? Colors.greenAccent.withOpacity(0.3) : Color(0xFFFFD700).withOpacity(0.2),
+                        backgroundColor: inv.verified! ? Colors.greenAccent.withOpacity(0.3) : ylwCol.withOpacity(0.2),
                         radius: 18,
                         child: Icon(
-                          color: inv.verified! ? Colors.greenAccent : Color(0xFFFFD700),
+                          color: inv.verified! ? Colors.greenAccent : ylwCol,
                           inv.verified! ? Icons.check : Icons.access_time_rounded,
                         ),
                       ),
@@ -2077,9 +2216,11 @@ Widget invoiceCard(Invoice inv,int index, {bool isAdd = false}) {
     ),
   );
 }
+
 Widget invAddingCard({bool canRemove = false}) {
   double cardHei = 285;
   Color incomeCol = invCtr.addingCardInvProd.income! > 0 ? winIncomeCol : looseIncomeCol;
+  bool isBuy = invCtr.isBuy;
 
   DropdownButton<Product> buildDropdown(List<Product> productList) {
     return DropdownButton<Product>(
@@ -2090,17 +2231,22 @@ Widget invAddingCard({bool canRemove = false}) {
           child: Text(product.name ?? ''),
         );
       }).toList(),
-      dropdownColor: blueColHex2,
+      dropdownColor: dropDownCol,
+      ///when pick new product
       onChanged: (Product? selectedProduct) {
         // Handle the selected product
         if (selectedProduct != null) {
           //Product prod = invCtr.selectedInvProdToAdd ;
           invCtr.addingCardProd = selectedProduct; //selected dropDown Product
 
-          invCtr.maxQty = selectedProduct.currQty!.toDouble();
+           if(!isBuy)   {
+            invCtr.maxQty = selectedProduct.currQtyReduced!.toDouble(); // same 2 line in initAddingCard()
+          }else{
+             invCtr.maxQty = 20000;
+           }
           invCtr.sliderVal = 0.0;
 
-          invCtr.updateAddingCard(updatePriceField: true); //update sell price
+          invCtr.updateAddingCard(updatePriceField: true); //update sell price textField
           invCtr.update(['addingCard']);
           //invCtr.invToAddPriceTec.text = invCtr.selectedInvProdToAdd.priceSell!.toInt().toString();
 
@@ -2150,6 +2296,7 @@ Widget invAddingCard({bool canRemove = false}) {
                               child: SizedBox(width: 44.w, height: 40, child: buildDropdown(invCtr.productsOfAddingCard)),
                             ),
                             SizedBox(width: 5.w),
+
                             ///price
                             SizedBox(
                               width: 28.w,
@@ -2165,7 +2312,7 @@ Widget invAddingCard({bool canRemove = false}) {
                                 validator: (value) {
                                   final numberRegExp = RegExp(r'^\d*\.?\d+$');
 
-                                  if (value!.isEmpty) {
+                                  if (value!.isEmpty || double.parse(value) == 0) {
                                     return "empty".tr;
                                   }
                                   // if (value.length > 9) {
@@ -2236,6 +2383,7 @@ Widget invAddingCard({bool canRemove = false}) {
                                 ),
                               ),
                             ),
+
                             ///qty
                             SizedBox(
                               width: 28.w,
@@ -2256,7 +2404,6 @@ Widget invAddingCard({bool canRemove = false}) {
                                     invCtr.sliderVal = 0;
                                     //showSnack('please enter a number to update slider'.tr,color: Colors.black38.withOpacity(0.8));
                                   }
-
                                 },
                                 controller: invCtr.addingQtyTec,
                                 keyboardType: TextInputType.number,
@@ -2264,7 +2411,7 @@ Widget invAddingCard({bool canRemove = false}) {
                                 validator: (value) {
                                   RegExp positiveIntegerPattern = RegExp(r'^\d+$');
 
-                                  if (value!.isEmpty) {
+                                  if (value!.isEmpty || double.parse(value) == 0) {
                                     return "empty".tr;
                                   }
                                   if (!positiveIntegerPattern.hasMatch(value!)) {
@@ -2302,10 +2449,12 @@ Widget invAddingCard({bool canRemove = false}) {
                             ),
                           ],
                         ),
+
                         /// /////////////////////////////////////////////////////////////////////
                         SizedBox(height: cardHei / 15),
+
                         ///sell calc
-                        Padding(
+                        if(!isBuy) Padding(
                           padding: const EdgeInsets.only(bottom: 0.0),
                           child: RichText(
                             locale: Locale(currLang!),
@@ -2363,8 +2512,9 @@ Widget invAddingCard({bool canRemove = false}) {
                             ]),
                           ),
                         ),
+
                         ///buy calc
-                        Padding(
+                         Padding(
                           padding: const EdgeInsets.only(bottom: 0.0),
                           child: RichText(
                             locale: Locale(currLang!),
@@ -2409,7 +2559,7 @@ Widget invAddingCard({bool canRemove = false}) {
                                   text: ' ${formatNumberAfterComma2(invCtr.addingCardInvProd.totalBuy!)} ',
                                   style: GoogleFonts.almarai(
                                     height: 1.8,
-                                    textStyle: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                                    textStyle: const TextStyle(color: buyCol, fontSize: 13, fontWeight: FontWeight.w500),
                                   )),
 
                               ///currency
@@ -2422,8 +2572,9 @@ Widget invAddingCard({bool canRemove = false}) {
                             ]),
                           ),
                         ),
+
                         ///income calc
-                        Padding(
+                       if(!isBuy) Padding(
                           padding: const EdgeInsets.only(bottom: 0.0),
                           child: RichText(
                             locale: Locale(currLang!),
@@ -2491,16 +2642,17 @@ Widget invAddingCard({bool canRemove = false}) {
     ),
   );
 }
+
 Widget invAddedCard({required InvProd prodAdded, required int index, bool canRemove = false, bool editable = false}) {
   double cardHei = 140;
   double calculatedIncome = (prodAdded.qty!) * (prodAdded.priceSell! - prodAdded.priceBuy!);
   Color incomeCol = calculatedIncome > 0 ? winIncomeCol : looseIncomeCol;
-
+  bool isBuy = invCtr.isBuy || invCtr.selectedInvoice.isBuy!;
   return GestureDetector(
     onTap: () {
       // open dialog (price / qty)
 
-      if (editable) {
+      if (editable && !isBuy) {
         showAnimDialog(
           invCtr.changeAddedDialog(price: prodAdded.priceSell!, qty: prodAdded.qty!, index: index),
           milliseconds: 200,
@@ -2547,7 +2699,7 @@ Widget invAddedCard({required InvProd prodAdded, required int index, bool canRem
                             SizedBox(height: 5),
 
                             ///sell
-                            Padding(
+                           if(!isBuy) Padding(
                               padding: const EdgeInsets.only(bottom: 0.0),
                               child: RichText(
                                 locale: Locale(currLang!),
@@ -2664,7 +2816,7 @@ Widget invAddedCard({required InvProd prodAdded, required int index, bool canRem
                                       style: GoogleFonts.almarai(
                                         height: 1.8,
                                         textStyle:
-                                            const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w500),
+                                            const TextStyle(color: buyCol, fontSize: 13, fontWeight: FontWeight.w500),
                                       )),
 
                                   ///currency
@@ -2680,7 +2832,7 @@ Widget invAddedCard({required InvProd prodAdded, required int index, bool canRem
                             ),
 
                             ///income
-                            Padding(
+                            if(!isBuy) Padding(
                               padding: const EdgeInsets.only(bottom: 0.0),
                               child: RichText(
                                 locale: Locale(currLang!),
@@ -2721,7 +2873,7 @@ Widget invAddedCard({required InvProd prodAdded, required int index, bool canRem
                 ),
               ),
             ),
-            if (canRemove)Positioned(
+            if (canRemove) Positioned(
                 top: 13,
                 right: (currLang == 'ar') ? null : 13, //english
                 left: (currLang == 'ar') ? 13 : null, //arabic
@@ -2736,13 +2888,12 @@ Widget invAddedCard({required InvProd prodAdded, required int index, bool canRem
                     invCtr.invProdsList.removeAt(index);
                     invCtr.update(['addedProds']);
                     Product removedProduct = prdCtr.productsList.firstWhere(
-                          (product) => product.name == prodAdded.name,
+                      (product) => product.name == prodAdded.name,
                     );
 
-                    invCtr.productsOfAddingCard.add(removedProduct);
-                    invCtr.initAddingCard();
+                    invCtr.productsOfAddingCard.add(removedProduct);//add again to list to find it in dropDown
+                    invCtr.initAddingCard();//after removing added card
                     invCtr.refreshInvProdsTotals();
-
                   },
                 ),
               ),
@@ -2753,7 +2904,6 @@ Widget invAddedCard({required InvProd prodAdded, required int index, bool canRem
   );
 }
 
-String currency = 'TND';
 
 /// ****** DEFAULT WIDGETS **************///////////////////////////////////////////////
 
@@ -2793,7 +2943,7 @@ Widget appNameText() {
     'Gajgaji Karim',
     textAlign: TextAlign.center,
     style: GoogleFonts.indieFlower(
-      textStyle: TextStyle(fontSize: 33, color: Colors.white, fontWeight: FontWeight.w700),
+      textStyle: TextStyle(fontSize: 33, color: Colors.white, fontWeight: FontWeight.w700, letterSpacing: 5),
     ),
   );
 }
@@ -2881,17 +3031,25 @@ Widget customTextField(
   );
 }
 
-getDayString(String time){
-  return DateFormat("dd-MM-yyyy HH:mm").parse(time).day.toString();
-}
-getMonthString(String time){
-  return getMonthName(DateFormat("dd-MM-yyyy HH:mm").parse(time).month);
+String getDayString(String time) {
+  DateTime parsedDateTime = dateFormatHM.parse(time);
+  String day = parsedDateTime.day.toString();
 
+  return day;
 }
+
+getMonthString(String time) {
+  return getMonthName(dateFormatHM.parse(time).month);
+}
+
+getYearString(String time) {
+  return dateFormatHM.parse(time).year.toString();
+}
+
 Widget monthSquare(String time) {
-  String day = DateFormat("dd-MM-yyyy HH:mm").parse(time).day.toString();
-  String monthName = getMonthName(DateFormat("dd-MM-yyyy HH:mm").parse(time).month);
-  String timeString = DateFormat("HH:mm").format(DateFormat("dd-MM-yyyy HH:mm").parse(time));
+  String day = dateFormatHM.parse(time).day.toString();
+  String monthName = getMonthName(dateFormatHM.parse(time).month);
+  String timeString = DateFormat("HH:mm").format(dateFormatHM.parse(time));
 
   return Container(
     width: 70,
@@ -2944,6 +3102,62 @@ Widget monthSquare(String time) {
   );
 }
 
+Widget indexSquare(String time, String index, verified) {
+  String day = dateFormatHM.parse(time).day.toString();
+  String monthName = getMonthName(dateFormatHM.parse(time).month);
+  String timeString = DateFormat("HH:mm").format(dateFormatHM.parse(time));
+
+  return Container(
+    width: 70,
+    height: 90,
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(15),
+      //color: Colors.white,
+      // border: Border.all(
+      //   color: Colors.white,
+      //   width: 2,
+      // ),
+    ),
+    child: Padding(
+      padding: const EdgeInsets.only(top: 7.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(
+            'Num°',
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 13,
+              height: 0.5,
+              color: Colors.white,
+            ),
+          ),
+          Text(
+            index,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 26,
+              height: 1.3,
+              fontWeight: FontWeight.bold,
+              color: verified ? Colors.greenAccent : Color(0xFFFFF66B).withOpacity(.8),
+            ),
+          ),
+          Text(
+            timeString,
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 13,
+              height: 1,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 Widget backGroundTemplate({Widget? child}) {
   return Container(
     //alignment: Alignment.topCenter,
@@ -2957,50 +3171,6 @@ Widget backGroundTemplate({Widget? child}) {
         // ),
         ),
     child: child,
-  );
-}
-
-Widget customButton(
-    {bool reversed = false,
-    Function()? btnOnPress,
-    Widget? icon,
-    String textBtn = 'button',
-    double btnWidth = 200,
-    Color? fillCol,
-    Color? borderCol}) {
-  List<Widget> buttonItems = [
-    icon!,
-
-    SizedBox(width: 10),
-    Text(
-      textBtn,
-      style: TextStyle(
-        color: Colors.white,
-        fontSize: 16,
-      ),
-    ),
-    //Icon(Icons.send_rounded,  color: Colors.white,),
-  ];
-
-  return SizedBox(
-    width: btnWidth,
-    child: ElevatedButton(
-      onPressed: btnOnPress!,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: reversed ? buttonItems.reversed.toList() : buttonItems,
-      ),
-      style: ElevatedButton.styleFrom(
-        primary: fillCol ?? cstmButtonFillCol.withOpacity(0.7),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
-        side: BorderSide(
-          color: borderCol ?? cstmButtonBorderCol,
-          width: 2,
-        ),
-      ),
-    ),
   );
 }
 

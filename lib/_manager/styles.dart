@@ -85,6 +85,8 @@ const Color winIncomeCol   = Colors.greenAccent;
 const Color errorColor   = Colors.redAccent;
 const Color looseIncomeCol  = Colors.red;
 const Color totalCol  = Colors.lightBlueAccent;
+const Color ylwCol  = Color(0xFFFFD700);
+const Color buyCol  = Color(0xFFffed89);
 
  Color activeCardBorder = Colors.lightBlueAccent;
 const Color normalCardBorder   = Colors.white38;
@@ -96,7 +98,7 @@ const Color dividerColor  = Colors.white;
 
 
 const blueColHex = Color(0Xff0a1227);
-const blueColHex2 = Color(0XFF16254b);
+const dropDownCol = Color(0XFF16254b);
 const chartValuesColor = Colors.white;
 const valuePopColor = Colors.greenAccent;
 

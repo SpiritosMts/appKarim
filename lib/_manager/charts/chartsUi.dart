@@ -12,8 +12,8 @@ import 'package:fl_chart/fl_chart.dart';
 import '../bindings.dart';
 import '../myVoids.dart';
 
-int eachTimeHis = 1;
-bool showBottomIndexZero = false;
+int periodGraphHis = 1;
+bool showBottomIndexZero = true;
 
 SideTitles get topTitles => SideTitles(
       //interval: 1,
@@ -68,7 +68,7 @@ SideTitles leftTitles(int valueInterval) {
   );
 }
 
-SideTitles bottomTimeTitles(int eachTime, List<String> timeList) {
+SideTitles bottomTimeTitles(int period, List<String> timeList) {
   //gas_times
   return SideTitles(
     interval: 1,
@@ -82,7 +82,7 @@ SideTitles bottomTimeTitles(int eachTime, List<String> timeList) {
       //bool isDivisibleBy15 = ((value.toInt() % 13 == 0) );
       //bottomText = (value.toInt() ).toString();
 
-      switch (value.toInt() % eachTime) {
+      switch (value.toInt() % period) {
         case 0:
 //        bottomText = DateFormat('HH:mm:ss').format(newDateTime);
           bottomText = timeList[index];
@@ -480,60 +480,109 @@ List<FlSpot> generateHistorySpots(List<double> valList) {
 Widget chartGraphValues(
     {Color? bgCol,
     int valueInterval = 50,
-    String? dataName,
+    String? graphName,
     List? dataList,
-    List<String>? timeList,
-    List<double>? valList,
+    List<String>? timeListX,
+    List<Color>? chartsColors,
+    List<List<double>>? valListY,
     double? width,
     double? minGraph,
     double? maxGraph,
+    bool withRedLine =true,
     double? extraMinMax}) {
 
-  double minValToShow = getDoubleMinValue(valList!); //- extraMinMax
-  print('## chart min value: ${minGraph}');
-  double maxValToShow = getDoubleMaxValue(valList); // + extraMinMax
-  print('## chart max value: ${maxGraph}');
+  ///double minValToShow = getDoubleMinValue(valListY!); //- extraMinMax
+  //print('## chart min value: ${minGraph}');
+  ///double maxValToShow = getDoubleMaxValue(valListY); // + extraMinMax
+  //print('## chart max value: ${maxGraph}');
 
+
+  List<LineChartBarData> lineCharts(){
+    List<LineChartBarData> lineChartBarData =[];
+    for (int index = 0; index < valListY!.length; index++) {
+      lineChartBarData.add(
+          LineChartBarData(
+            ///fill
+            // belowBarData: BarAreaData(
+            //     color: Colors.blue,
+            //     //cutOffY: 0,
+            //     //ap aplyCutOffY: true,
+            //     spotsLine: BarAreaSpotsLine(
+            //       show: true,
+            //     ),
+            //     show: true
+            // ),
+            dotData: FlDotData(
+              show: false,
+            ),
+            show: true,
+            preventCurveOverShooting: false,
+            //showingIndicators:[0,5,6],
+            isCurved: true,
+            isStepLineChart: false,
+            isStrokeCapRound: false,
+            isStrokeJoinRound: false,
+
+            barWidth: 3.0,
+            curveSmoothness: 0.02,
+            preventCurveOvershootingThreshold: 10.0,
+            lineChartStepData: LineChartStepData(stepDirection: 0),
+            //shadow: Shadow(color: Colors.blue,offset: Offset(0,8)),
+            color: chartsColors![index],
+            //spots: points.map((point) => FlSpot(point.x, point.y)).toList(),
+
+            spots: generateHistorySpots(valListY[index]),
+          )
+      );
+    }
+
+    return lineChartBarData;
+  }
+
+  List<LineTooltipItem> popTouch(List<LineBarSpot> touchedSpots){
+    List<LineTooltipItem> lineTooltipItem =[];
+    for (int index = 0; index < valListY!.length; index++) {
+      lineTooltipItem.add(
+        LineTooltipItem(//total
+          formatNumberAfterComma2(valListY![index][touchedSpots[index].spotIndex]),
+          TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: chartsColors![index],
+          ),
+        )
+      );
+    }
+
+    return lineTooltipItem;
+  }
+
+
+  /// ///////////////////////////////////////////////////////////
   return Padding(
     padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 20),
     child: Container(
       child: Column(
         children: [
+          //name
           Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // IconButton(
-                //   onPressed: () async {
-                //     await ctr.initHistoryValues('patients/${ctr.selectedServer}/bpm_history'); // shoiw delete dialog
-                //   },
-                //   icon: Icon(
-                //     Icons.refresh,
-                //     color: Colors.white,
-                //     size: 20,
-                //   ),
-                // ),
+
                 Text(
-                  dataName!,
+                  graphName!,
                   style: TextStyle(fontSize: 24, color: Colors.white70),
                 ),
                 SizedBox(
                   width: 5,
                 ),
-                Text(
-                  '(${formatNumberAfterComma2(minValToShow)}, ${formatNumberAfterComma2(maxValToShow)})',
-                  style: TextStyle(fontSize: 15, color: Colors.white70),
-                ),
-                // IconButton(
-                //   onPressed: () async {
-                //     await ctr.deleteHisDialog(dataName!, dataList!); // shoiw delete dialog
-                //   },
-                //   icon: Icon(
-                //     Icons.close_fullscreen_outlined,
-                //     color: Colors.white,
-                //     size: 20,
-                //   ),
-                // )
+                /// max min
+                // Text(
+                //   '(${formatNumberAfterComma2(minValToShow)}, ${formatNumberAfterComma2(maxValToShow)})',
+                //   style: TextStyle(fontSize: 15, color: Colors.white70),
+                // ),
+
               ],
             ),
           ),
@@ -541,7 +590,7 @@ Widget chartGraphValues(
             scrollDirection: Axis.horizontal,
             child: Container(
               height: 100.h / 3,
-              width: 100.h * width!,
+              width: 100.w * width!,
               child: Padding(
                 padding: const EdgeInsets.only(right: 6.0, left: 0),
                 child: Container(
@@ -565,45 +614,12 @@ Widget chartGraphValues(
                             fitInsideVertically: true,
                             tooltipPadding: EdgeInsets.all(8.0),
                             //maxContentWidth: 40,
-                            getTooltipItems: (touchedSpots) {
-                              const textStyle = TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              );
-                              return [
-                                LineTooltipItem(
-                                  formatNumberAfterComma2(invCtr.totals[touchedSpots[1].spotIndex]),
-                                    TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w700,
-                                      color: totalCol,
-                                    ),
-                                ),
-                                LineTooltipItem(//income
-                                  formatNumberAfterComma2(valList[touchedSpots[0].spotIndex]),
-                                  TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w700,
-                                    color: winIncomeCol,
-                                  ),
-                                )
-                              ];
-                              // return touchedSpots.map((LineBarSpot touchedSpot) {
-                              //     //gc.changeGazTappedValue(gc.dataPoints[touchedSpot.spotIndex].toString());
-                              //     const textStyle = TextStyle(
-                              //       fontSize: 10,
-                              //       fontWeight: FontWeight.w700,
-                              //       color: Colors.white,
-                              //     );
-                              //     return LineTooltipItem(
-                              //       formatNumberAfterComma2(valList[touchedSpot.spotIndex]),
-                              //       textStyle,
-                              //     );
-                              //   },
-                              // ).toList();
+                            /// depend on list
+                            getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                              return popTouch(touchedSpots);
                             },
                           ),
+
                           getTouchedSpotIndicator: (LineChartBarData barData, List<int> indicators) {
                             return indicators.map(
                               (int index) {
@@ -615,85 +631,22 @@ Widget chartGraphValues(
                               },
                             ).toList();
                           },
-                          getTouchLineEnd: (_, __) => double.infinity),
+                          getTouchLineEnd: (_, __) => double.infinity
+                      ),
+                      lineBarsData: lineCharts(),   /// depend on list
+
                       baselineY: 0,
                       minY: minGraph,
                       maxY: maxGraph,
                       titlesData: FlTitlesData(
                         show: true,
-                        bottomTitles: AxisTitles(sideTitles: bottomTimeTitles(eachTimeHis, timeList!)),
+                        bottomTitles: AxisTitles(sideTitles: bottomTimeTitles(periodGraphHis, timeListX!)),
                         // time line
                         //leftTitles: AxisTitles(sideTitles: leftTitles(valueInterval)),
                         // values line
                         topTitles: AxisTitles(sideTitles: topTitles),
                         rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       ),
-                      lineBarsData: [
-                        LineChartBarData(
-                          ///fill
-                          // belowBarData: BarAreaData(
-                          //     color: Colors.blue,
-                          //     //cutOffY: 0,
-                          //     //ap aplyCutOffY: true,
-                          //     spotsLine: BarAreaSpotsLine(
-                          //       show: true,
-                          //     ),
-                          //     show: true
-                          // ),
-                          dotData: FlDotData(
-                            show: false,
-                          ),
-                          show: true,
-                          preventCurveOverShooting: false,
-                          //showingIndicators:[0,5,6],
-                          isCurved: true,
-                          isStepLineChart: false,
-                          isStrokeCapRound: false,
-                          isStrokeJoinRound: false,
-
-                          barWidth: 3.0,
-                          curveSmoothness: 0.02,
-                          preventCurveOvershootingThreshold: 10.0,
-                          lineChartStepData: LineChartStepData(stepDirection: 0),
-                          //shadow: Shadow(color: Colors.blue,offset: Offset(0,8)),
-                          color: winIncomeCol,
-                          //spots: points.map((point) => FlSpot(point.x, point.y)).toList(),
-
-                          spots: generateHistorySpots(valList),
-                        ),
-                        LineChartBarData(
-                          ///fill
-                          // belowBarData: BarAreaData(
-                          //     color: Colors.blue,
-                          //     //cutOffY: 0,
-                          //     //ap aplyCutOffY: true,
-                          //     spotsLine: BarAreaSpotsLine(
-                          //       show: true,
-                          //     ),
-                          //     show: true
-                          // ),
-                          dotData: FlDotData(
-                            show: false,
-                          ),
-                          show: true,
-                          preventCurveOverShooting: false,
-                          //showingIndicators:[0,5,6],
-                          isCurved: true,
-                          isStepLineChart: false,
-                          isStrokeCapRound: false,
-                          isStrokeJoinRound: false,
-
-                          barWidth: 3.0,
-                          curveSmoothness: 0.02,
-                          preventCurveOvershootingThreshold: 10.0,
-                          lineChartStepData: LineChartStepData(stepDirection: 0),
-                          //shadow: Shadow(color: Colors.blue,offset: Offset(0,8)),
-                          color: totalCol,
-                          //spots: points.map((point) => FlSpot(point.x, point.y)).toList(),
-
-                          spots: generateHistorySpots(invCtr.totals),
-                        ),
-                      ],
 
                       ///rangeAnnotations
                       rangeAnnotations: RangeAnnotations(
@@ -702,13 +655,11 @@ Widget chartGraphValues(
                           //   VerticalRangeAnnotation(x1: 3,x2: 4)
                           // ],
                           horizontalRangeAnnotations: [
-                            HorizontalRangeAnnotation(y1: 0, y2: 50000, color: Colors.redAccent),
+                             HorizontalRangeAnnotation(y1: 0, y2: withRedLine ? 50000:0, color: Colors.redAccent),
                             // HorizontalRangeAnnotation(y1: 3,y2: 4),
                             // HorizontalRangeAnnotation(y1: 5,y2: 6),
                           ]),
-
                       backgroundColor: bgCol ?? secondaryColor.withOpacity(0.3),
-
                       /// backgound
                       borderData: FlBorderData(
                           border: const Border(

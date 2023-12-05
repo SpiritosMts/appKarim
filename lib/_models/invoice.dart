@@ -6,19 +6,23 @@ class Invoice {
   String? deliveryEmail;
   String? deliveryAddress;
   String? type;
+  String? index;
+  String? deliveryMatFis;
 
-  String? timeOut;
-  Map<String, dynamic>? productsOut;
-  double? outTotal;
+  String? timeOut;//time when inv added at first (means when you add the inv after choosing its type 'multiple,client or delivery')
+  String? timeReturn;//time when inv added when check (here timeOut == timeReturn)
+
+  Map<String, dynamic>? productsOut;//products added to inv at first
+  double? outTotal;//the total at first
 
 
-  String? timeReturn;
   Map<String, dynamic>? productsReturned;
-  double? returnTotal;
+  double? returnTotal;//the total when check the inv
   double? income;
 
   bool? verified;//false at pending // check at the end
-  bool? totalChanged;
+  bool? totalChanged; //if outTotal != returnTotal its 'true' it means the total changed
+  bool? isBuy;//if inv
 
 
   Invoice({
@@ -26,8 +30,11 @@ class Invoice {
     this.deliveryName='',
     this.timeOut='',
     this.timeReturn='',
+    this.deliveryMatFis='',
+    this.index='',
     this.verified=false,
     this.totalChanged=false,
+    this.isBuy=false,
     this.deliveryAddress='',
     this.type='',
     this.deliveryTruckNum='',
@@ -49,12 +56,15 @@ class Invoice {
       'deliveryEmail': deliveryEmail,
       'deliveryAddress': deliveryAddress,
       'type': type,
+      'index': index,
+      'deliveryMatFis': deliveryMatFis,
 
       'totalChanged': totalChanged,
 
       'timeOut': timeOut,
       'timeReturn': timeReturn,
       'verified': verified,
+      'isBuy': isBuy,
 
       'productsOut': productsOut,
       'productsReturned': productsReturned,
@@ -71,9 +81,12 @@ class Invoice {
       deliveryName: json['deliveryName'],
       timeOut: json['timeOut'],
       type: json['type'],
+      isBuy: json['isBuy']?? false,//this is used when field do not exist in db
       totalChanged: json['totalChanged'],
       timeReturn: json['timeReturn'],
       verified: json['verified'],
+      deliveryMatFis: json['deliveryMatFis'],
+      index: json['index'],
       deliveryAddress: json['deliveryAddress'],
       deliveryTruckNum: json['deliveryTruckNum'],
       deliveryPhone: json['deliveryPhone'],
@@ -85,4 +98,6 @@ class Invoice {
       income: json['income'].toDouble(),
     );
   }
+
+
 }

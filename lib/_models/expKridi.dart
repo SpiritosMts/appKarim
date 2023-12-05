@@ -10,11 +10,13 @@ class ExpKridi {
   String? desc;
   String? type;
   double? price;
+  bool? paid;
 
   ExpKridi({
     this.time='',
     this.desc='',
     this.type='',
+    this.paid=false,
     this.price=0.0,
   });
 
@@ -23,6 +25,7 @@ class ExpKridi {
       time: json['time'],
       desc: json['desc'],
       type: json['type'],
+      paid: json['paid'],
       price: json['price']?.toDouble(),
     );
   }
@@ -31,6 +34,7 @@ class ExpKridi {
     return {
       'time': time,
       'desc': desc,
+      'paid': paid,
       'type': type,
       'price': price,
     };

@@ -4,12 +4,14 @@ import 'dart:async';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import '../invoices/invoiceView(home).dart';
+import '../privateData.dart';
 import '../workers/workersView.dart';
 import 'bindings.dart';
 import 'myUi.dart';
@@ -60,12 +62,25 @@ class _VerifySigningInState extends State<LoadingScreen> {
       print('## connected');
       timer.cancel();
 
-      if(withFetchUser){
-        authCtr.fetchUser();// find route depending on user role TODO
+      await getPrivateData();
 
-      }else{
-        Get.offAll(() => HomeScreen());//Home
+      if (!access) {
+        print('## access denied');
 
+        showTos('Server Error'.tr);
+        SystemNavigator.pop();
+        // showWarning(
+        //   txt: 'Server Error'.tr,
+        //   btnOkPress: () async {
+        //     SystemNavigator.pop();
+        //   },
+        // );
+      }
+      else{
+        if (withFetchUser) {
+        } else {
+          Get.offAll(() => HomeScreen()); //Home
+        }
       }
 
       /// => next route < LOGIN (if no user logged in found)  / HOME (user found) >
@@ -94,16 +109,16 @@ class _VerifySigningInState extends State<LoadingScreen> {
 
                 /// Logo Image
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10.0),
+                  padding: const EdgeInsets.only(bottom: 00.0),
                   child: Image.asset(
-                    'assets/images/factory.png',
+                    'assets/images/gajLg.png',
                     fit: BoxFit.cover,
-                    width: 170,
-                    height: 170,
+                    width: 200,
+                    height: 200,
                   ),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
                 // text
                 Padding(
@@ -112,7 +127,9 @@ class _VerifySigningInState extends State<LoadingScreen> {
                     width: double.infinity,
                     height: 100,
                     decoration: BoxDecoration(),
+
                     child: appNameText(),
+
                   ),
                 ),
                 // check your cnx

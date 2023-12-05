@@ -19,8 +19,6 @@ import '_manager/myTheme/myThemeCtr.dart';
 import '_manager/styles.dart';
 import 'firebase_options.dart';
 import '_manager/bindings.dart';
-import '_manager/firebaseControl.dart';
-import '_manager/intro.dart';
 import '_manager/loadingScreen.dart';
 import '_manager/myLocale/myLocale.dart';
 import '_manager/myLocale/myLocaleCtr.dart';
@@ -100,6 +98,7 @@ class _MyAppState extends State<MyApp> {
     return ResponsiveSizer(
         builder: (context, orientation, deviceType) {
           return GetMaterialApp(
+            restorationScopeId: 'scopeId',
             navigatorKey: navigatorKey,
             debugShowCheckedModeBanner: false,
             title: 'Gajgaji',
@@ -114,8 +113,7 @@ class _MyAppState extends State<MyApp> {
 
             initialBinding: GetxBinding(),
             getPages: [
-              GetPage(name: '/', page: () => ((introTimes < introShowTimes) && showIntro) ? IntroScreen():LoadingScreen()),
-              //GetPage(name: '/', page: () => ScreenManager()),//in test mode
+              GetPage(name: '/', page: () => LoadingScreen()),
 
             ],
           );
@@ -124,55 +122,3 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-
-/// Buttons Page Route
-class ScreenManager extends StatefulWidget {
-  @override
-  _ScreenManagerState createState() => _ScreenManagerState();
-}
-
-
-class _ScreenManagerState extends State<ScreenManager> {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: ListView(
-        children: <Widget>[
-          TextButton(
-              onPressed: () {
-                Get.to(() => LoadingScreen());
-              },
-              child: Text('LoadingScreen')),
-
-          TextButton(
-              onPressed: () async {
-                await fbAuth.signOut();
-                await googleSign.signOut();
-                //sharedPrefs!.setBool('isGuest', false);
-                print('## user signed out');
-              },
-              child: Text('LogOut')),
-
-          TextButton(
-              onPressed: () {
-                Get.to(() => FirebaseControl());
-              },
-              child: Text('Firebase control')),
-
-
-          TextButton(
-              onPressed: () {
-                //sharedPrefs!.remove('saved_purchases');
-                sharedPrefs!.clear();
-                print('## prefs_cleared');
-
-              },
-              child: Text('clear prefs')),
-
-
-
-        ],
-      ),
-    );
-  }
-}

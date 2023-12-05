@@ -4,14 +4,15 @@ import 'package:gajgaji/_manager/myUi.dart';
 import 'package:gajgaji/_models/invoice.dart';
 import 'package:gajgaji/invoices/addEditInvoice.dart';
 import 'package:gajgaji/invoices/invoiceCtr.dart';
+import 'package:gajgaji/invoices/invoicesHistory.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
-import '../_manager/auth/profile_manage/settings.dart';
 import '../_manager/bindings.dart';
+import '../_manager/firebaseVoids.dart';
 import '../_manager/myVoids.dart';
 import '../_manager/styles.dart';
 import '../clients/clientssView.dart';
@@ -40,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   //#################################################################"
   //#################################################################"*
 
+  bool once =true;
   @override
   Widget build(BuildContext context) {
     return AdvancedDrawer(
@@ -52,20 +54,14 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                Container(
-                  width: 128.0,
-                  height: 128.0,
-                  margin: const EdgeInsets.only(
-                    top: 30.0,
-                    bottom: 24.0,
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    color: Colors.black26,
-                    shape: BoxShape.circle,
-                  ),
+                /// Logo Image
+                Padding(
+                  padding: const EdgeInsets.only(top: 10.0),
                   child: Image.asset(
-                    'assets/images/factory.png',
+                    'assets/images/gajLg.png',
+                    fit: BoxFit.cover,
+                    width: 200,
+                    height: 200,
                   ),
                 ),
                 appNameText(),
@@ -101,14 +97,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   leading: Icon(Icons.group),
                   title: Text('Clients'.tr),
                 ),
-                ListTile(
-                  onTap: () {
-                    _advancedDrawerController.hideDrawer();
-                    Get.to(() => GraphsView());
-                  },
-                  leading: Icon(Icons.ssid_chart),
-                  title: Text('graphic study'.tr),
-                ),
+                // ListTile(
+                //   onTap: () {
+                //     _advancedDrawerController.hideDrawer();
+                //     Get.to(() => GraphsView());
+                //   },
+                //   leading: Icon(Icons.ssid_chart),
+                //   title: Text('graphic study'.tr),
+                // ),
                 ListTile(
                   onTap: () {
                     _advancedDrawerController.hideDrawer();
@@ -121,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ListTile(
                   onTap: () {
 
+                    showAnimDialog(invCtr.changeTreasuryDialog());
                   },
                   leading: Icon(Icons.attach_money),
                   title:  GetBuilder<InvoicesCtr>(
@@ -197,6 +194,14 @@ class _HomeScreenState extends State<HomeScreen> {
               },
             ),
           ),
+          actions: <Widget>[
+            IconButton(
+              icon: Icon(Icons.history),
+              onPressed: () {
+                Get.to(()=>InvoicesHistory());
+              },
+            ),
+          ],
         ),
         body: backGroundTemplate(
           child: GetBuilder<InvoicesCtr>(builder: (context) {
@@ -205,31 +210,34 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (BuildContext context, AsyncSnapshot<List<Invoice>> snapshot) {
                 if (snapshot.hasData && snapshot.data!.isNotEmpty) {
                   List<Invoice> invoices = snapshot.data!;
-                  print('## invoicesList (ctr) updated');
+                  //print('## invoicesList (ctr) updated');
 
-                  DateFormat dateFormat = DateFormat('dd-MM-yyyy HH:mm');
 
                   invoices.sort((a, b) {
-                    DateTime timeA = dateFormat.parse(a.timeReturn!);
-                    DateTime timeB = dateFormat.parse(b.timeReturn!);
+                    DateTime timeA = dateFormatHM.parse(a.timeReturn!);
+                    DateTime timeB = dateFormatHM.parse(b.timeReturn!);
                     return timeB.compareTo(timeA);
                   });
 
+                  if(once){
+                    invCtr.orderedInvs = invoices;
+                    invCtr.invCount = invoices.length;
+
+                    once =false;
+                  }
                   invCtr.refreshAllInvoices(invoices);
 
                   return (invoices.isNotEmpty)
                       ? ListView.builder(
                           //physics: const NeverScrollableScrollPhysics(),
-
                           //itemExtent: 180,
-
                           reverse: false,
                           padding: const EdgeInsets.only(top: 5,bottom:60, right: 15, left: 15,),
                           shrinkWrap: true,
                           itemCount: invoices.length,
                           itemBuilder: (BuildContext context, int index) {
                             Invoice inv = (invoices[index]);
-                            return invoiceCard(inv,index);
+                            return isDateToday(inv.timeReturn!)?   invoiceCard(inv,index) : Container();
                           })
                       : Center(
                           child: Padding(
@@ -267,17 +275,41 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }),
         ),
+        /// add_categ button
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton:  Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          child: Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              customFAB(
+                text: 'Buy'.tr,
+                heroTag: 'buy',
+                icon: Icons.add_shopping_cart_outlined,
+                onPressed: () {
+                  invCtr.invType='Multiple';
+                  Get.to(()=>AddEditInvoice(),arguments: {'isAdd': true,'isVerified': false,'isBuy': true,});
 
-        /// add new invoice
-        floatingActionButtonLocation: FloatingActionButtonLocation.endDocked,
-        floatingActionButton: customFAB(
-          text: 'New Invoice'.tr,
-          onPressed: () {
-            invCtr.showTypeDialog();
-            //removeField();
-            //addChangedTotalField();
-          },
+                },
+              ),
+              customFAB(
+                text: 'Sell'.tr,
+                icon: Icons.shopping_cart_outlined,
+                heroTag: 'sell',
+                onPressed: () {
+                  if(invCtr.notCheckedBuyInvoices.length == 0){
+                    showAnimDialog(invCtr.showTypeDialog());
+                  }else{
+                    showSnack('You have to check all purchases invoices before adding new sell invoice'.tr,color:Colors.redAccent.withOpacity(0.8));
+                  } //changeAllDocsManualIndex();
+                  //changeAllDocsManual();
+                },
+              ),
+
+            ],
+          ),
         ),
+
 
       ),
     );

@@ -141,8 +141,14 @@ class AddBuySellProd extends StatelessWidget {
                             //prdCtr.addSellProc();
 
                           }else{
-                            prdCtr.addBuyProc();
+                            ///manual prod add qty <BUY> //u can activate
 
+                            // prdCtr.addBuyProc(
+                            //     prod: prdCtr.selectedProd,
+                            //     chosenQty: int.parse(prdCtr.bsQtyTec.text),
+                            //     invID: '',
+                            //     deliveryName: invCtr.selectedInvoice.deliveryName!
+                            // );
                           }
                         },
                         child: Text(

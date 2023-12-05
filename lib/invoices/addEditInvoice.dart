@@ -24,9 +24,26 @@ class AddEditInvoice extends StatefulWidget {
   State<AddEditInvoice> createState() => _AddEditInvoiceState();
 }
 
+/// ////////// NOTES /////////////::////
+ // 3 types of inv adding,waiting,checked
+ // in this screen u'll find <List<InvProd> invProdsList> (prods added) and <InvProd addingCardInvProd> (adding card)
+ // when send inv to fb "invProdsList" will be converted to "map" and if i open a waiting or checked inv that "map" will convert to "invProdsList"
+// when waiting inv (draft,not verified yet) added it doesnt affect the treasury or products stock but if its checked=verified it does
+//same  thing for deleting inv
+// in adding card (the card put we use to add prods through it which has u choose the prod name from dropdown and the price textField if the type
+// of inv "isBuy" then its buy inv of type "multiple" else its sell inv of type "multiple, client or delivery" and it has a slider to set qty
+// or you can manually change it through the qty textField after setting prod info to add to  inv click on the arrow to switch it from [AddingCard]->[AddedCard])
+//when you check a "sell inv" all prods in it will decrease its qty value and increase treasury (society money) & when checking 'buy inv' all prods will increase qty and decrease treasury &&&& "" chenge each product <currBuyPrice> ""
+// all buy invoices have to be checked before adding new buy invoice
+/// ////////////////////////////////////
+
+
+
 class _AddEditInvoiceState extends State<AddEditInvoice> {
-  bool isAdd = Get.arguments['isAdd'];
-  bool isVerified = Get.arguments['isVerified'];
+  bool isAdd = Get.arguments['isAdd'];// true if "new inv",false if "waiting for check"
+  bool isVerified = Get.arguments['isVerified'];// true if "checked"
+  bool isBuy = Get.arguments['isBuy'];// used when inv not added yet
+  bool selectedIsBuy = invCtr.selectedInvoice.isBuy!;//user for inv checked or waiting
 
   double spaceFields = 25;
 
@@ -37,9 +54,9 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
   void initState() {
     super.initState();
 
-    invCtr.productsOfAddingCard = prdCtr.productsList.where((product) => product.currQty! > 0).toList();
 
-    if(!isAdd){
+
+    if(!isAdd){///CHECK INVOICE
 
       invCtr.invType = invCtr.selectedInvoice.type!;
 
@@ -50,31 +67,37 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
       invCtr.deliveryPhoneTec.text = invCtr.selectedInvoice.deliveryPhone!;
       invCtr.deliveryEmailTec.text = invCtr.selectedInvoice.deliveryEmail!;
       invCtr.deliveryAddressTec.text = invCtr.selectedInvoice.deliveryAddress!;
+      invCtr.deliveryMatFisTec.text = invCtr.selectedInvoice.deliveryMatFis!;
 
-      if(invCtr.selectedInvoice.verified!){
-        invCtr.convertInvProdsMapToList(invCtr.selectedInvoice.productsReturned!);
 
-      }else{
-        invCtr.convertInvProdsMapToList(invCtr.selectedInvoice.productsOut!);
-
+      /// convert products saved as maps in fb to model List<InvProd>
+      if(invCtr.selectedInvoice.verified!){ //not checked
+       invCtr.invProdsList = invCtr.convertInvProdsMapToList(invCtr.selectedInvoice.productsReturned!);
+      }else{//checked
+        invCtr.invProdsList = invCtr.convertInvProdsMapToList(invCtr.selectedInvoice.productsOut!);
       }
 
-      invCtr.refreshInvProdsTotals();    //init products list
+      invCtr.refreshInvProdsTotals();
       invCtr.update(['addedProds']);
 
       //print('## ${invCtr.InvProdsAdded}');
 
-    }else{
-      invCtr.selectInvoice(Invoice());
-      invCtr.resetAddINvoice();
-
+    }
+    else{///ADD INVOICE
+      invCtr.selectInvoice(Invoice());//select empty inv
+      invCtr.resetAddINvoice();//reset inv values
       //invCtr.outIncomeTotal = invCtr.selectedInvoice.
 
     }
 
+    invCtr.isBuy = isBuy;
 
     //init adding card
-    invCtr.initAddingCard();
+    invCtr.initAddingCard();//after open "addEditInvoice" screen
+
+    print('## isBuy= $isBuy');
+    print('## invCtr.isBuy= ${invCtr.isBuy}');
+    print('## isAdd= $isAdd');
   }
 
 
@@ -99,13 +122,24 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                         SizedBox(
                           height: 50,
                         ),
-                        Container(
+                        /// ////////////////// invoice type /////////////////////
+
+                        (isBuy || selectedIsBuy) ? Container(
+                    child: Text(
+                        'Purchases invoice'.tr,
+                      style: TextStyle(
+                          fontFamily: 'Segoe UI',
+                          fontSize: 32,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ): Container(
                           child: Text(
                            //isAdd? 'New Invoice'.tr : isVerified? 'Verified Invoice'.tr : 'Returned Invoice'.tr,
-                          '${ isAdd?  invCtr.invType:invCtr.selectedInvoice.type} Invoice'.tr,
+                          '${currLang == 'fr'?'Facture de':''} ${ isAdd?  invCtr.invType.tr:invCtr.selectedInvoice.type!.tr} ${currLang == 'en'?'Invoice':''}',
                             style: TextStyle(
                                 fontFamily: 'Segoe UI',
-                                fontSize: 35,
+                                fontSize: 32,
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold),
                           ),
@@ -113,9 +147,10 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                         SizedBox(
                           height: 13,
                         ),
+                        /// ///////////// invoice time //////////////////////////
                         Container(
                           child: Text(
-                           isAdd? ''.tr : isVerified? 'Time: ${invCtr.selectedInvoice.timeReturn}'.tr : 'Time: ${invCtr.selectedInvoice.timeOut}'.tr,
+                           isAdd? ''.tr : isVerified? '${'Time'.tr}: ${invCtr.selectedInvoice.timeReturn}'.tr : 'Time: ${invCtr.selectedInvoice.timeOut}'.tr,
                             style: TextStyle(
                                 fontFamily: 'Segoe UI',
                                 fontSize: 20,
@@ -128,7 +163,7 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                           height: 40,
                         ),
 
-                        /// /////////////////////////////////
+                        /// ///////////////////////////////// FIELDS /////////////////////////////
 
                         //name
                         if(invCtr.selectedInvoice.deliveryName !='' && !isAdd || isAdd )  Padding(
@@ -169,6 +204,7 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                             // },
                           ),
                         ),
+                        // address
                         if(invCtr.selectedInvoice.deliveryAddress !='' && !isAdd || isAdd ) Padding(
                           padding:  EdgeInsets.only(bottom: spaceFields),
                           child: customTextField(
@@ -181,7 +217,19 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
 
                           ),
                         ),
+                        // matFis
+                        if(invCtr.selectedInvoice.deliveryMatFis !='' && !isAdd || isAdd ) Padding(
+                          padding:  EdgeInsets.only(bottom: spaceFields),
+                          child: customTextField(
+                            controller: invCtr.deliveryMatFisTec,
+                            enabled: isAdd,
 
+                            labelText: 'tax number'.tr,
+                            hintText: 'Enter tax registration number'.tr,
+                            icon: Icons.numbers,
+
+                          ),
+                        ),
                         //email
                          if(invCtr.selectedInvoice.deliveryEmail !='' && !isAdd || isAdd ) Padding(
                            padding:  EdgeInsets.only(bottom: spaceFields),
@@ -253,7 +301,12 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                           builder: (ctr) {
                           return Column(
                             children: List.generate(invCtr.invProdsList.length, (index) {
-                              return invAddedCard(prodAdded:invCtr.invProdsList[index],index: index ,canRemove:  isAdd, editable: (!isAdd && !invCtr.selectedInvoice.verified!) );//make the key of map as index
+                              return invAddedCard(
+                                  prodAdded:invCtr.invProdsList[index],
+                                  index: index,
+                                  canRemove:  isAdd,
+                                  editable: (!isAdd && !invCtr.selectedInvoice.verified!)
+                              );//make the key of map as index
                             }),
                           );
                         }
@@ -269,8 +322,6 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
 
                         /// /////////////////////////////////////////////////
                         SizedBox(height: 20),
-
-
                         // ListView.builder(
                         //     //physics: const NeverScrollableScrollPhysics(),
                         //
@@ -305,10 +356,29 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                               ),
                             ),
                             onPressed: () {
-                              if(isAdd) {
-                            invCtr.addInvoice();
-                          } else {
-                              invCtr.checkInvoice();
+                              if(isAdd) {//new inv
+                                if(!isBuy){
+
+                                }else{
+
+                                }
+                                // both buy and sell
+                                invCtr.addSellInvoice();
+                              } else {//waiting inv
+                                if(invCtr.selectedInvoice.id!='no-id'){
+                                  if(!invCtr.selectedInvoice.isBuy!){
+                                    print('checking sell invoice ....');
+
+                                    invCtr.checkSellInvoice();
+                                  }else{
+                                    print('checking buy invoice ....');
+
+                                    invCtr.checkBuyInvoice();
+                                  }
+                                }else{
+                                  print('no invoice selected');
+                                  showSnack('no invoice selected'.tr);
+                                }
                           }
                         },
                             child: Text(
@@ -321,6 +391,7 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                           ),
                         ),
 
+                        /// totals(sell,buy,income) and inv ID
                         GetBuilder<InvoicesCtr>(
                           id: 'invTotal',
                           builder: (ctr) {
@@ -330,7 +401,7 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                             return Column(
                               children: [
                                 ///sell
-                                Padding(
+                                if(!isBuy && !selectedIsBuy)  Padding(
                                   padding: const EdgeInsets.only(bottom: 0.0),
                                   child: RichText(
                                     locale: Locale(currLang!),
@@ -342,7 +413,7 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                                             width: 0,
                                           )),
                                       TextSpan(
-                                          text: 'invoice outSell:',
+                                          text: 'Total Sell:'.tr,
 
                                           style: GoogleFonts.almarai(
 
@@ -397,7 +468,7 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                                             width: 0,
                                           )),
                                       TextSpan(
-                                          text: 'invoice outBuy:',
+                                          text: 'Total Buy:'.tr,
 
                                           style: GoogleFonts.almarai(
 
@@ -415,7 +486,7 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
 
                                             height: 1.8,
                                             textStyle: const TextStyle(
-                                                color: Colors.white,
+                                                color: buyCol,
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w500
                                             ),
@@ -439,7 +510,7 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                                 ),
 
                                 ///income
-                                Padding(
+                              if(!isBuy && !selectedIsBuy)  Padding(
                                   padding: const EdgeInsets.only(bottom: 0.0),
                                   child: RichText(
                                     locale: Locale(currLang!),
@@ -452,7 +523,7 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                                           )),
 
                                       TextSpan(
-                                          text: 'invoice income:',
+                                          text: 'Total Income:'.tr,
 
                                           style: GoogleFonts.almarai(
 
@@ -491,6 +562,85 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
                                     ]),
                                   ),
                                 ),
+
+                                if(!isAdd)...[
+                                  /// ID inv
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 0.0),
+                                    child: RichText(
+                                      locale: Locale(currLang!),
+                                      textAlign: TextAlign.start,
+                                      //softWrap: true,
+                                      text: TextSpan(children: [
+                                        TextSpan(
+                                            text: 'invoice ID:'.tr,
+
+                                            style: GoogleFonts.almarai(
+
+                                              height: 1.8,
+                                              textStyle:  TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500
+                                              ),
+                                            )),
+                                        TextSpan(
+                                            text: ' ${invCtr.selectedInvoice.id}',
+
+
+                                            style: GoogleFonts.almarai(
+
+                                              height: 1.8,
+                                              textStyle:  TextStyle(
+                                                  color: Colors.white54,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500
+                                              ),
+                                            )),
+
+                                      ]),
+                                    ),
+                                  ),
+                                  /// index inv
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 0.0),
+                                    child: RichText(
+                                      locale: Locale(currLang!),
+                                      textAlign: TextAlign.start,
+                                      //softWrap: true,
+                                      text: TextSpan(children: [
+                                        TextSpan(
+                                            text: 'invoice index:'.tr,
+
+                                            style: GoogleFonts.almarai(
+
+                                              height: 1.8,
+                                              textStyle:  TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500
+                                              ),
+                                            )),
+                                        TextSpan(
+                                            text: ' ${invCtr.selectedInvoice.index}',
+
+
+                                            style: GoogleFonts.almarai(
+
+                                              height: 1.8,
+                                              textStyle:  TextStyle(
+                                                  color: Colors.white54,
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.w500
+                                              ),
+                                            )),
+
+                                      ]),
+                                    ),
+                                  ),
+                                ]
+
+
                               ],
                             );
                           }
@@ -536,23 +686,29 @@ class _AddEditInvoiceState extends State<AddEditInvoice> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            ///Print Inv
+
             FloatingActionButton(
               onPressed: () {
                 Get.to(()=>PrintScreen());
 
               },
               backgroundColor: Colors.yellowAccent.withOpacity(0.2),
-              heroTag: null,
+              heroTag: 'printInv',
               child: const Icon(Icons.print),
             ),
+            ///Change Total
+
             if(!isVerified) FloatingActionButton(
               onPressed: () {
                 //change outsell
-                invCtr.changeTotalSellDialog(price: invCtr.outSellTotal);
-
+                showAnimDialog(
+                  invCtr.changeTotalSellDialog(price:invCtr.selectedInvoice.isBuy! ? invCtr.outBuyTotal:  invCtr.outSellTotal),
+                  milliseconds: 200,
+                );
               },
               backgroundColor: Colors.blue.withOpacity(0.3),
-              heroTag: null,
+              heroTag: 'changeTot',
               child: const Icon(Icons.currency_exchange),
             ),
           ],

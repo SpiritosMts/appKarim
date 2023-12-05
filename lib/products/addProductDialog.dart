@@ -24,12 +24,13 @@ class AddProduct extends StatelessWidget {
         initState: (_) {
           if (!isAdd) {//update
 
-            prdCtr.priceTec.text = prdCtr.selectedProd.currPrice.toString();
+            prdCtr.sellPriceTec.text = prdCtr.selectedProd.currPrice.toString();
+            prdCtr.buyPriceTec.text = prdCtr.selectedProd.currBuyPrice.toString();
             prdCtr.qtyTec.text = prdCtr.selectedProd.currQty.toString();
           }
           else{//add
-            prdCtr.priceTec.text = '';
-            prdCtr.buyPpriceTec.text = '';
+            prdCtr.sellPriceTec.text = '';
+            prdCtr.buyPriceTec.text = '';
             prdCtr.qtyTec.text = '';
             prdCtr.nameTec.text = '';
             prdCtr.qtyPerUnitTec.text = '';
@@ -48,8 +49,6 @@ class AddProduct extends StatelessWidget {
                     ),
 
                     /// components
-
-
                     if(isAdd) customTextField(
                       controller: prdCtr.nameTec,
                       labelText: 'Name'.tr,
@@ -69,7 +68,7 @@ class AddProduct extends StatelessWidget {
 
                     customTextField(
                       textInputType: TextInputType.number,
-                      controller: prdCtr.priceTec,
+                      controller: prdCtr.sellPriceTec,
                       labelText: 'Price'.tr,
                       hintText: ''.tr,
                       icon: Icons.attach_money,
@@ -90,9 +89,9 @@ class AddProduct extends StatelessWidget {
                     SizedBox(
                       height: 18,
                     ),
-                    if(isAdd) customTextField(
+                     customTextField(
                       textInputType: TextInputType.number,
-                      controller: prdCtr.buyPpriceTec,
+                      controller: prdCtr.buyPriceTec,
                       labelText: 'buy Price'.tr,
                       hintText: ''.tr,
                       icon: Icons.attach_money,
@@ -172,7 +171,7 @@ class AddProduct extends StatelessWidget {
                                 prdCtr.addProduct();
                               } else {
                                 prdCtr.updateProductWithManualChange();
-                                // ichangesf (prdCtr.addProductKey.currentState!.validate()) {
+                                //  (prdCtr.addProductKey.currentState!.validate()) {
                                 //   prdCtr.addprodChangeProc(
                                 //       product: prdCtr.selectedProd,
                                 //       manual: true,

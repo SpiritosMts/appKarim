@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gajgaji/_models/expKridi.dart';
@@ -8,6 +9,7 @@ import 'package:get/get_state_manager/src/simple/get_controllers.dart';
 
 import '../_manager/bindings.dart';
 import '../_manager/firebaseVoids.dart';
+import '../_manager/myUi.dart';
 import '../_manager/myVoids.dart';
 import '../_manager/styles.dart';
 import '../_models/client.dart';
@@ -51,6 +53,7 @@ class WorkersCtr extends GetxController {
     //print('## init HomeCtr');
     Future.delayed(const Duration(milliseconds: 50), () {});
   }
+
   @override
   void onClose() {
     super.onClose();
@@ -93,7 +96,7 @@ class WorkersCtr extends GetxController {
         role: roleTec.text,
         speciality: specialityTec.text,
         sex: sex,
-        joinDate: todayToString(showHours: false),
+        joinDate: todayToString(showDay: true),
         verified: true,
         totalKridi: 0.0,
         totalExpenses: 0.0,
@@ -121,6 +124,7 @@ class WorkersCtr extends GetxController {
       });
     }
   }
+
   updateWorker() async {
     if (registerWorkerKey.currentState!.validate()) {
       showLoading(text: 'Loading'.tr);
@@ -145,7 +149,6 @@ class WorkersCtr extends GetxController {
             btnOkPress: () {
               Get.back();
               Get.back();
-
             });
         Future.delayed(const Duration(milliseconds: 500), () {
           update();
@@ -155,6 +158,8 @@ class WorkersCtr extends GetxController {
       });
     }
   }
+
+
 
   addExpense() {
     //merge with kridi
@@ -170,20 +175,24 @@ class WorkersCtr extends GetxController {
               time: todayToString(),
               price: double.parse(priceTec.text),
               type: typeTec.text,
-              desc: descTec.text)
-              .toJson(),
+              desc: descTec.text
+          ).toJson(),
           addSuccess: () {
             invCtr.addSubSocietyCash(-1 * double.parse(priceTec.text));/// sub from treasury
+            updateFieldInFirestore('workers',selectedWorker.id!,'totalExpenses',selectedWorker.totalExpenses! + double.parse(priceTec.text));/// add to total exp
+            update();
 
-            Get.back();// hide loading
+
+            Get.back(); // hide loading
             priceTec.clear();
             typeTec.clear();
             descTec.clear();
           });
-      Get.back();
+      //Get.back();
 
     }
   }
+
   addKridi() {
     if (expKridiWorkerKey.currentState!.validate()) {
       showLoading(text: 'Loading...'.tr);
@@ -200,33 +209,161 @@ class WorkersCtr extends GetxController {
               desc: descTec.text)
               .toJson(),
           addSuccess: () {
+
             invCtr.addSubSocietyCash(-1 * double.parse(priceTec.text));/// sub from treasury
-            Get.back();// hide loading
+            updateFieldInFirestore('workers',selectedWorker.id!,'totalKridi',selectedWorker.totalKridi! + double.parse(priceTec.text));/// add to total kridi
+            update();
+            Get.back(); // hide loading
             priceTec.clear();
             typeTec.clear();
             descTec.clear();
           });
-      Get.back();
+      //Get.back();
 
     }
   }
+      returnKridi() {
+      if (expKridiWorkerKey.currentState!.validate()) {
+        showLoading(text: 'Loading...'.tr);
 
-  //dialogs
-  addExpKridiDialog({bool isExpense = true}) {
-    return AlertDialog(
-      backgroundColor: dialogsCol,
-      title: Text(isExpense ? 'Add New Expensive'.tr:'Add New Kridi'.tr,
-        style: TextStyle(
-          color: dialogTitleCol,
-        ),),
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(
-          Radius.circular(12.0),
+        addToMap(
+            withBackDialog: true,
+            coll: workersColl,
+            docID: selectedWorker.id,
+            fieldMapName: 'kridiHis',
+            mapToAdd: ExpKridi(
+                time: todayToString(),
+                price: double.parse(priceTec.text),
+                type: typeTec.text,
+                desc: descTec.text,
+              paid: true,/// returned kridi
+            )
+                .toJson(),
+            addSuccess: () {
+              double newTotal = 0.0;
+              if(selectedWorker.totalKridi! - double.parse(priceTec.text) < 0){
+                newTotal = selectedWorker.totalKridi!;
+              }else {
+                newTotal = selectedWorker.totalKridi! - double.parse(priceTec.text);
+              }
+
+              invCtr.addSubSocietyCash(double.parse(priceTec.text) > selectedWorker.totalKridi! ? selectedWorker.totalKridi!:double.parse(priceTec.text));///  treasury
+              updateFieldInFirestore('workers',selectedWorker.id!,'totalKridi',newTotal);  /// sub frm total kridi
+                     update();
+              Get.back(); // hide loading
+              Get.back();//retuen to wrk list
+              update();
+              priceTec.clear();
+              typeTec.clear();
+              descTec.clear();
+            });
+
+      }
+    }
+
+    //dialogs
+
+    addExpKridiDialog({bool isExpense = true}) {
+      return AlertDialog(
+        backgroundColor: dialogsCol,
+        title: Text(isExpense ? 'Add New Expensive'.tr : 'Add New Kridi'.tr,
+          style: TextStyle(
+            color: dialogTitleCol,
+          ),),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(12.0),
+          ),
         ),
-      ),
-      content: AddExpKridi(isExpense: isExpense),
-    );
+        content: AddExpKridi(isExpense: isExpense),
+      );
+    }
+
+    returnKridiDialog({bool isExpense = true}) {
+      return AlertDialog(
+        backgroundColor: dialogsCol,
+        title: Text('Kridi: ${formatNumberAfterComma2(selectedWorker!.totalKridi!)} TND'.tr ,
+          style: TextStyle(
+            color: dialogTitleCol,
+          ),),
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(
+            Radius.circular(12.0),
+          ),
+        ),
+        content: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+
+          child: Form(
+            key: wrkCtr.expKridiWorkerKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                SizedBox(height: 20,),
+
+                /// components
+
+                customTextField(
+                  textInputType: TextInputType.number,
+                  controller: wrkCtr.priceTec,
+                  labelText: 'Price'.tr,
+                  hintText: ''.tr,
+                  icon: Icons.attach_money,
+                  validator: (value) {
+                    final numberRegExp = RegExp(r'^\d*\.?\d+$');
+                    if (value!.isEmpty) {
+                      return "price can't be empty".tr;
+                    }
+                    if (!numberRegExp.hasMatch(value!)) {
+                      return 'Please enter a valid price'.tr;
+                    }
+
+                    return null;
+
+                  },
+                ),
+                SizedBox(height: 18,),
+
+
+
+
+
+
+                /// buttons
+                Padding(
+                  padding: EdgeInsets.symmetric(vertical: 15.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      //cancel
+                      TextButton(
+                        style: borderStyle(),
+                        onPressed: () {
+                          Get.back();
+                        },
+                        child: Text(
+                          "Cancel".tr,
+                          style: TextStyle(color: dialogButtonTextCol),
+                        ),
+                      ),
+                      //add
+                      TextButton(
+                        style: filledStyle(),
+                        onPressed: () async {
+                            returnKridi();
+                        },
+                        child: Text(
+                          "Sub".tr,
+                          style: TextStyle(color: dialogButtonTextCol ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
   }
-
-
-}

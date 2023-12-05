@@ -49,13 +49,14 @@ class _ClientsViewState extends State<ClientsView> {
 
                 cltCtr.clientsList = clients;
 
+
                 return  (clients.isNotEmpty)
                     ? ListView.builder(
                    // physics: const NeverScrollableScrollPhysics(),
 
                     //itemExtent: 180,
 
-                    padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                    padding: const EdgeInsets.only(top: 5,bottom:60, right: 15, left: 15,),
                     shrinkWrap: true,
                     itemCount: clients.length,
                     itemBuilder: (BuildContext context, int index) {
